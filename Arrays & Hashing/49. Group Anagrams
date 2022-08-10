@@ -1,0 +1,72 @@
+//Java
+
+We could have use Prime multiplication but it'll lead to overflow for longer string.
+
+//v1 for speed
+
+class Solution {
+    public List<List<String>> groupAnagrams(String[] strs) {
+        if (strs == null || strs.length == 0) return new ArrayList<>();
+        Map<String, List<String>> map = new HashMap<>();
+        for (String s : strs) {
+            char[] ca = new char[26];
+            for (char c : s.toCharArray()) ca[c - 'a']++;
+            String keyStr = String.valueOf(ca);
+            //System.out.println(keyStr);
+            if (!map.containsKey(keyStr)) map.put(keyStr, new ArrayList<>());
+            map.get(keyStr).add(s);
+        }
+        return new ArrayList<>(map.values());
+    }
+}
+
+//v2 for memory
+
+class Solution {
+    public List<List<String>> groupAnagrams(String[] strs) {
+        
+        Map<String, List<String>> map = new HashMap<>();
+        for(String w : strs){
+            String key = hash(w);          
+            if(!map.containsKey(key)) map.put(key, new LinkedList<>());
+            map.get(key).add(w);
+        }
+        
+        return new ArrayList<>(map.values());
+    }
+    
+    String hash(String s){
+        int[] a = new int[26];
+        for(char c : s.toCharArray()) a[c-'a']++;
+        return Arrays.toString(a);
+    }
+}
+
+//C++
+
+class Solution {
+public:
+    vector<vector<string>> groupAnagrams(vector<string>& strs) {
+        vector<vector<string>> result;
+        unordered_map<string,vector<string>> maps;
+        string str = "";
+        
+        for(string& ele: strs){
+            str = ele;
+            sort(str.begin(), str.end());
+
+            if(maps.find(str) != maps.end()){
+                maps[str].push_back(ele);
+            }
+            else{
+                maps[str] = {ele};
+            }
+        }
+        
+        for(auto kv : maps){
+            result.push_back(kv.second);
+        }
+        
+        return result;
+    }
+};
