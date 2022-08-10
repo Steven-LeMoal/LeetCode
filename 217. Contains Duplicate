@@ -1,0 +1,35 @@
+//Java
+
+import java.util.HashMap;
+import java.util.Map;
+
+class Solution {
+    public boolean containsDuplicate(int[] nums) {
+        Map<Integer, Integer> mp = new HashMap<Integer, Integer>();
+
+        for(int ele : nums){
+            if(mp.get(ele) != null) return true;
+            mp.put(ele,1);
+        }
+        
+        return false;
+    }
+}
+
+//C++
+
+class Solution {
+public:
+    bool containsDuplicate(vector<int>& nums) {
+        unordered_map<int,int> maps;
+        
+        for(int i = 0; i < nums.size();i++){  
+            if(maps.find(nums[i]) == maps.end()) maps[nums[i]] = 0;
+            else{
+                return true;
+            }
+        }
+        
+        return false;
+    }
+};
