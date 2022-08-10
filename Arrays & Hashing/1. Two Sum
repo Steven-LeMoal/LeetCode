@@ -1,0 +1,35 @@
+// Java
+
+class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        Map<Integer, Integer> mp = new HashMap<Integer, Integer>();
+        int n = nums.length;
+        
+        for(int i = 0; i < n ; mp.put(target - nums[i], i++)){
+            if(mp.containsKey(nums[i])){
+                return new int[]{mp.get(nums[i]), i};
+            }
+        }
+
+        return new int[]{-1, -1};
+    }
+}
+
+//C++
+
+class Solution {
+public:
+    vector<int> twoSum(vector<int>& nums, int target) {
+        unordered_map<int, int> hash;
+        int m = nums.size();
+
+        for(int i = 0; i < m; ++i){
+            if(hash.find(nums[i]) != hash.end() and i != hash[nums[i]]) {
+                return {i, hash[nums[i]]};
+            }
+            hash[target - nums[i]] = i;
+        }
+
+        return {-1, -1};
+    }
+};
