@@ -1,1 +1,41 @@
+// Java
 
+public class Solution {
+    public boolean isAnagram(String s, String t) {
+        int[] alphabet = new int[26];
+        for (int i = 0; i < s.length(); i++) alphabet[s.charAt(i) - 'a']++;
+        for (int i = 0; i < t.length(); i++) alphabet[t.charAt(i) - 'a']--;
+        for (int i : alphabet) if (i != 0) return false;
+        return true;
+    }
+}
+
+// C++
+
+class Solution {
+public:
+    bool isAnagram(string s, string t) {
+        unordered_map<char, int> maps;
+        const std::string albet{"abcdefghijklmnopqrstuvwxyz"};
+        
+        for(const auto ele: albet){
+            maps[ele] = 0;
+        }
+        
+        for(const auto ele : s){
+            maps[ele]++;
+        }
+        
+        for(const auto ele: t){
+            maps[ele]--;
+        }
+        
+        for(const auto ele: albet){
+            if(maps[ele] != 0){
+                return false;
+            }
+        }
+        
+        return true;
+    }
+};
