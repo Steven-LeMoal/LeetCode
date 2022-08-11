@@ -1,0 +1,110 @@
+//Java - using QuickSort Approach
+
+class Solution {
+    Map<Integer, Integer> freq;
+    int[] uniqueNums;
+    public void quickSelect(int left, int right, int kthSmallest){
+        if(left == right){
+            return;
+        }
+        Random random = new Random();
+        int pivot = left + random.nextInt(right-left);
+        int loc = partition(left, right, pivot);
+        if(loc == kthSmallest){
+            return;
+        } else if(loc > kthSmallest){
+            quickSelect(left, loc-1, kthSmallest);
+        } else if(loc < kthSmallest){
+            quickSelect(loc+1, right, kthSmallest);
+        }
+    }
+    public int partition(int left, int right, int pivot){
+        int pVal = freq.get(uniqueNums[pivot]);
+        swap(pivot, right);
+        int storeIdx = left;
+        for(int i = left; i <= right; i++){
+            if(freq.get(uniqueNums[i]) < pVal){
+                swap(i, storeIdx);
+                storeIdx++;
+            }
+        }
+        swap(storeIdx, right);
+        return storeIdx;
+    }
+    public void swap(int idx1, int idx2){
+        int temp = uniqueNums[idx1];
+        uniqueNums[idx1] = uniqueNums[idx2];
+        uniqueNums[idx2] = temp;
+    }
+    public int[] topKFrequent(int[] nums, int k) {
+        freq = new HashMap<>();
+        for(int num : nums){
+            freq.put(num, freq.getOrDefault(num, 0)+1);
+        }
+        int n = freq.size();
+        uniqueNums = new int[n];
+        int i = 0;
+        for(int key : freq.keySet()){
+            uniqueNums[i] = key;
+            i++;
+        }
+        quickSelect(0, n-1, n-k);
+        return Arrays.copyOfRange(uniqueNums, n-k, n);
+    }
+    
+}
+
+//C++ - using minHeap and BucketSort Approach
+
+class Solution {
+public:
+    vector<int> topKFrequent(vector<int>& nums, int k) {
+        unordered_map<int,int> m;
+        
+        vector<int> ans;
+        
+        priority_queue<pair<int,int>> pq;
+        
+        for(auto x : nums) m[x]++;
+        
+        for(auto x : m) pq.push({x.second,x.first});
+        
+        
+        while(k--)
+        {
+            ans.push_back(pq.top().second);
+            pq.pop();
+        }
+        
+        return ans;
+    }
+};
+
+class Solution {
+public:
+    vector<int> topKFrequent(vector<int>& nums, int k) {
+        if (nums.empty())
+            return {};
+        
+        vector<int> topElement;
+        vector<vector<int>> buckets(nums.size() + 1);
+        
+        unordered_map<int, int> numMap;
+        
+        for (int num : nums)
+            numMap[num]++;
+        for (auto it = numMap.begin(); it != numMap.end(); it++) 
+            buckets[it->second].push_back(it->first);
+        
+        for (int i = buckets.size()-1; i >= 0; i--) {
+            for (int j = 0; j < buckets[i].size(); j++) {
+                topElement.push_back(buckets[i][j]);
+                
+                if (topElement.size() == k)
+                    return topElement;
+            }
+        }
+        
+        return topElement;
+    }
+};
