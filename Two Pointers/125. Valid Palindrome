@@ -1,0 +1,42 @@
+//Java
+
+public class Solution {
+    public boolean isPalindrome(String s) {
+        char[] charMap = new char[256];
+        for (int i = 0; i < 10; i++)
+            charMap['0'+i] = (char) (1+i);  // numeric - don't use 0 as it's reserved for illegal chars
+        for (int i = 0; i < 26; i++)
+            charMap['a'+i] = charMap['A'+i] = (char) (11+i);  //alphabetic, ignore cases, continue from 11
+        
+        for (int start = 0, end = s.length()-1; start < end;) {
+            if (charMap[s.charAt(start)] == 0)
+                start++;
+            else if (charMap[s.charAt(end)] == 0)
+                end--;
+            else if (charMap[s.charAt(start++)] != charMap[s.charAt(end--)])
+                return false;
+        }
+        return true;
+    }
+}
+
+//C++
+
+class Solution {
+public:
+    bool isPalindrome(string s) {
+        int left = 0, right = s.length()-1;
+        while(left<right)
+        {
+            if(!isalnum(s[left])) left++;
+            else if(!isalnum(s[right])) right--;
+            else if(tolower(s[left++])!=tolower(s[right--])) return false;
+        }
+        return true;
+    }
+};
+
+/*
+ * O(n) Time and
+ * O(1) Space
+ */
