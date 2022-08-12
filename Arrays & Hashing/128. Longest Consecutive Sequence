@@ -48,7 +48,7 @@ class Solution {
 }
 
 
-//C++
+//C++ + to review later (union find approach)
 
 class Solution {
 public:
@@ -77,3 +77,50 @@ public:
     }
 };
 }
+
+class Solution {
+public:
+    
+    const static int mxN = 1e5+1;
+    int p[mxN], sz[mxN];
+    unordered_map<int, int> idx;    
+    
+    int find(int u){
+        while(p[u]!=u){
+            p[u] = p[p[u]]; // path compression
+            u = p[u];
+        }
+        return p[u];
+    }
+    
+    void unite(int u, int v){
+        u = find(u), v = find(v);
+        if(u!=v){
+            // point the root of the smaller tree to the bigger tree's root. 
+            // to constraint the maximum depth of any node to be almost constant
+            if(sz[u]>sz[v]){ // union by size
+                p[v] = u; 
+                sz[u]+=sz[v];
+            }else{
+                p[u] = v;
+                sz[v] += sz[u];
+            }
+        }
+    }
+    
+    int longestConsecutive(vector<int>& nums) {
+        int n = nums.size();
+        iota(p, p + n, 0);
+        fill(sz, sz + n, 1);
+        for(int i=0; i<n; i++){
+            if(idx.find(nums[i])!=idx.end())
+                continue;
+            if(idx.find(nums[i]+1)!=idx.end())
+                unite(i, idx[nums[i]+1]);
+            if(idx.find(nums[i]-1)!=idx.end())
+                unite(i, idx[nums[i]-1]);
+            idx[nums[i]] = i;
+        }
+        return *max_element(sz, sz+n);
+    }
+};
