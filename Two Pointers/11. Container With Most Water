@@ -1,0 +1,44 @@
+//Java
+
+class Solution {
+    public int maxArea(int[] height) {
+        int len = height.length;
+        int left = 0;
+        int right = len - 1;
+        int max = Math.min(height[left], height[right]) * (right - left);
+        while (left < right) {
+            // Move the shorter lines each time
+            if (height[left] <= height[right]) {
+                left++;
+            } else {
+                right--;
+            }
+
+            // update the max area
+            max = Math.max(max, Math.min(height[left], height[right]) * (right - left));
+        }
+
+        return max;
+    }
+}
+
+//C++
+
+class Solution {
+public:
+    int maxArea(vector<int>& height) {
+        int upper = height.size() - 1;
+        int lower = 0;
+        int best = 0;
+        
+        while(upper > lower){
+            best = max(best, (upper - lower) * min(height[lower], height[upper]));
+            
+            if(height[lower] < height[upper]) lower++;
+            else{ upper--; }
+        }
+        
+        return best;
+    }
+    
+};
