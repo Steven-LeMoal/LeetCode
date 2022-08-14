@@ -1,0 +1,75 @@
+//Java
+
+class Solution {
+        public int characterReplacement(String s, int k) {
+        int[] cArr = new int[26];
+        int maxCount = 0, start = 0, maxSize = 0;
+        
+        for(int end = 0; end < s.length(); end ++){
+            cArr[s.charAt(end) - 'A']++;
+            maxCount = Math.max(maxCount, cArr[s.charAt(end) - 'A']);
+            
+            // if max character frequency + distance between start and end is greater than k
+            // this means we have considered changing more than k charactres. So time to shrink window
+            if(end - start + 1 - maxCount > k){
+                cArr[s.charAt(start) - 'A']--;
+                start ++;
+            }
+            
+            maxSize = Math.max(maxSize, end - start + 1);
+        }
+        
+        return maxSize;
+    }
+}
+
+//C++
+
+class Solution {
+public:
+    int characterReplacement(string s, int k) {
+        int n = s.length();
+        if(n == k) return n;
+        if(n == 1) return 1;
+
+        int res = 0;
+        int maxCnt = 0;
+        
+        unordered_map<char,int> mp;
+        
+        for(int l = 0, r = 0; r < n; r++)
+        {
+            mp[s[r]]++;
+            maxCnt = max(maxCnt,mp[s[r]]);
+            while(r - l + 1 - maxCnt > k){
+                mp[s[l]]--;
+                l++;
+            }
+            res = max(r - l + 1, res);
+        }
+        return res;
+    }
+    
+    int characterReplacement2(string s, int k) {
+        int n = s.length();
+        if(n == k) return n;
+        if(n == 1) return 1;
+
+        int res = 0;
+
+        unordered_map<char, int> mp;
+        using pair_type = decltype(mp)::value_type;
+        auto it =[] (const pair_type& p1, const pair_type& p2) {return p1.second < p2.second;};
+        
+        for(int l = 0, r = 0; r < n; r++)
+        {
+            mp[s[r]]++;
+            while(r - l + 1 - (max_element(mp.begin(), mp.end(), it)->second) > k){
+                mp[s[l]]--;
+                l++;
+            }
+            res = max(r - l + 1, res);
+        }
+        return res;
+    }
+};
