@@ -1,0 +1,33 @@
+//Java -- (faster because 256 int hashset)
+
+public class Solution {
+    public int lengthOfLongestSubstring(String s) {
+        int result = 0;
+        int[] cache = new int[256];
+        for (int i = 0, j = 0; i < s.length(); i++) {
+            j = (cache[s.charAt(i)] > 0) ? Math.max(j, cache[s.charAt(i)]) : j;
+            cache[s.charAt(i)] = i + 1;
+            result = Math.max(result, i - j + 1);
+        }
+        return result;
+    }
+}
+
+//C++
+
+class Solution {
+public:
+    int lengthOfLongestSubstring(string s) {
+        int n = int(s.length()), res = 0;
+        unordered_map<char, int> mp;
+
+        for (int j = 0, i = 0; j < n; j++){
+            if(mp[s[j]] > 0) {
+                i = max(mp[s[j]],i);
+            }
+            res = max(res, j - i + 1);
+            mp[s[j]] = j + 1;
+        }
+        return res;
+    }
+};
