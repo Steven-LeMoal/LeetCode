@@ -1,4 +1,4 @@
-//Java -- (faster because 256 int hashset)
+//Java -- (faster because 256 int array)
 
 public class Solution {
     public int lengthOfLongestSubstring(String s) {
