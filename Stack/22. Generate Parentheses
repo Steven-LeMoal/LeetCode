@@ -1,0 +1,68 @@
+Use Dp for optimal : https://leetcode.com/problems/generate-parentheses/discuss/1519267/Brute-force-to-Optimized-Approach-C++
+Different use of python generator or python tricks : https://leetcode.com/problems/generate-parentheses/discuss/10096/4-7-lines-Python
+
+//Python
+
+class Solution:
+    def generateParenthesis(self, n: int) -> List[str]:
+        def backtracking(nOpen, nClose, path):
+            if n == nClose:  # Found a valid n pairs of parentheses
+                ans.append(path)
+                return
+
+            if nOpen < n:  # Number of opening bracket up to `n`
+                backtracking(nOpen + 1, nClose, path + "(")
+            if nClose < nOpen:  # Number of closing bracket up to opening bracket
+                backtracking(nOpen, nClose + 1, path + ")")
+
+        ans = []
+        backtracking(0, 0, "")
+        return ans
+//Java
+
+    List<String> list = new ArrayList<>();
+
+    public List<String> generateParenthesis(int n) {
+        recursiveFunction(new char[2*n] , 0 , 0 , 0 , n);
+        return list;
+    }
+
+    private void recursiveFunction(char[] arr , int currIndex , int opened , int closed , int toBeOpened )
+    {
+        if(currIndex >= arr.length) {
+            list.add(new String(arr));
+            return;
+        }
+
+        if(opened > closed) {
+            arr[currIndex] = ')';
+            recursiveFunction(arr , currIndex+1 , opened, closed + 1, toBeOpened);
+        }
+
+        if(toBeOpened != 0) {
+            arr[currIndex] = '(';
+            recursiveFunction(arr , currIndex+1 ,  opened+1 , closed , toBeOpened-1 );
+        }
+
+    }
+
+}
+
+//C++
+
+class Solution {
+public:
+    vector<string> ret;
+    vector<string> generateParenthesis(int n) {
+        helper("", n, n);
+        return ret;
+    }
+    void helper(string str, int left, int right){
+        if(left == 0 && right == 0){
+            ret.push_back(str);
+            return;
+        }
+        if(left > 0) helper(str + "(", left - 1, right);
+        if(right > left) helper(str + ")", left, right - 1);
+    }
+};
