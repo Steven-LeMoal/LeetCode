@@ -1,0 +1,99 @@
+//Java
+
+public class Solution {
+    public String minWindow(String s, String t) {
+        if (s.length() < t.length()) return "";
+        int[] hash = new int[256];
+        char[] chs = s.toCharArray(), cht = t.toCharArray();
+        for (char c : cht) {
+            hash[c]++;
+        }
+        int[] res = new int[2];
+        int lo = 0, hi = 0, count = cht.length, minLen = Integer.MAX_VALUE;
+        while (hi < chs.length) {
+            char c = chs[hi];
+            if (hash[c] >= 1) {
+                count--;
+            }
+            hash[c]--;
+            hi++;
+
+            while (count == 0) {
+                if (hi - lo < minLen) {
+                    minLen = hi - lo;
+                    res[0] = lo;
+                    res[1] = hi;
+                }
+                char prev = chs[lo++];
+                if (hash[prev]++ >= 0) count++;
+            }
+        }
+        return s.substring(res[0], res[1]);
+    }
+}
+
+//C++
+
+class Solution {
+public:
+    string minWindow(string s, string t) {
+        vector<int> map(128,0);
+        for(auto c: t) map[c]++;
+        int counter=t.size(), begin=0, end=0, d=INT_MAX, head=0;
+        while(end<s.size()){
+            if(map[s[end++]]-->0) counter--; //in t
+            while(counter==0){ //valid
+                if(end-begin<d)  d=end-(head=begin);
+                if(map[s[begin++]]++==0) counter++;  //make it invalid
+            }  
+        }
+        return d==INT_MAX? "":s.substr(head, d);
+    }
+};
+
+class Solution {
+public:
+    string minWindow(string s, string t) {
+        int n = s.length();
+        int m = t.length();
+        
+        if(m > n) return "";
+        else if(m == 1){
+            if(s.find(t) != std::string::npos) return t;
+            else{return "";}
+        } 
+        
+        unordered_map<char, int> cntT;
+        unordered_map<char, int> window;
+        int have = 0;
+        int need = 0;
+        int resStart = 0;
+        int reslen = -1;
+        
+        for(const auto& ele : t){
+            cntT[ele]++;
+            if(cntT[ele] == 1) need += 1;
+        }
+        
+        for(int l = 0, r = 0;r < n; r++){
+            window[s[r]]++;
+            if(cntT.find(s[r]) != cntT.end() and window[s[r]] == cntT[s[r]]) have++;
+            
+            while(need == have){
+                if(r - l + 1 < reslen or reslen == -1){
+                    reslen = r - l + 1;
+                    resStart = l;
+                }
+                window[s[l]]--;
+                if(cntT.find(s[l]) != cntT.end() and window[s[l]] < cntT[s[l]]) have--;
+                l++;
+            }
+        }
+        
+        if(reslen == -1) return "";
+        
+        return s.substr(resStart, reslen);
+    }
+    
+    
+};
