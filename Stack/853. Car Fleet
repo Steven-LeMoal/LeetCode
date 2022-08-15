@@ -1,0 +1,104 @@
+//Python
+
+class Solution(object):
+      def carFleet(self, target, pos, speed):
+        time = [float(target - p) / s for p, s in sorted(zip(pos, speed))]
+        res = cur = 0
+        for t in time[::-1]:
+            if t > cur:
+                res += 1
+                cur = t
+        return res
+
+class Solution:
+      def carFleet(self, target: int, position: List[int], speed: List[int]) -> int:
+ 
+        cars = []
+        for i in range(len(position)):
+            cars.append((position[i], speed[i]))
+        
+        cars.sort(key=lambda x: (x[0], x[1]), reverse=True) # desc order : closer to traget comes first
+        stack = []
+        for x, v in cars:
+            dist = target - x # remaning distance to tagret
+            if not stack:
+                stack.append(dist/v) # arrivalTime = dist/v
+            elif dist/v > stack[-1]: # car arrives late -> thus does not join previous fleet and forms its own fleet
+                stack.append(dist/v)
+            # if curr arrivalTime is <= prev arrivalTime -> then curr car joins prev fleet and gets discolved into it (aka we don't need to do anything)
+        return len(stack)
+
+//Java
+
+Java, use Array
+
+    public int carFleet(int target, int[] pos, int[] speed) {
+        int N = pos.length, res = 0;
+        double[][] cars = new double[N][2];
+        for (int i = 0; i < N; ++i)
+            cars[i] = new double[] {pos[i], (double)(target - pos[i]) / speed[i]};
+        Arrays.sort(cars, (a, b) -> Double.compare(a[0], b[0]));
+        double cur = 0;
+        for (int i = N - 1; i >= 0 ; --i) {
+            if (cars[i][1] > cur) {
+                cur = cars[i][1];
+                res++;
+            }
+        }
+        return res;
+    }
+Java, use TreeMap:
+
+    public int carFleet(int target, int[] pos, int[] speed) {
+        Map<Integer, Double> m = new TreeMap<>(Collections.reverseOrder());
+        for (int i = 0; i < pos.length; ++i)
+            m.put(pos[i], (double)(target - pos[i]) / speed[i]);
+        int res = 0; double cur = 0;
+        for (double time : m.values()) {
+            if (time > cur) {
+                cur = time;
+                res++;
+            }
+        }
+        return res;
+    }
+
+//C++
+
+/*
+    n cars 1 road, diff pos/speeds, faster cars slow down -> car fleet, return # fleets
+    Ex. target = 12, pos = [10,8,0,5,3], speeds = [2,4,1,1,3] -> 3 (10 & 8, 0, 5 & 3)
+
+    Sort by start pos, calculate time for each car to finish, loop backwards
+    If car behind finishes faster then catches up to fleet, else creates new fleet
+
+    Time: O(n log n)
+    Speed: O(n)
+*/
+
+class Solution {
+public:
+    int carFleet(int target, vector<int>& position, vector<int>& speed) {
+        int n = position.size();
+        
+        vector<pair<int, double>> cars;
+        for (int i = 0; i < n; i++) {
+            double time = (double) (target - position[i]) / speed[i];
+            cars.push_back({position[i], time});
+        }
+        sort(cars.begin(), cars.end());
+        
+        double maxTime = 0.0;
+        int result = 0;
+        
+        for (int i = n - 1; i >= 0; i--) {
+            double time = cars[i].second;
+            if (time > maxTime) {
+                maxTime = time;
+                result++;
+            }
+        }
+        
+        return result;
+    }
+};
