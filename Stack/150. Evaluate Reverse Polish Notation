@@ -1,0 +1,124 @@
+//Java
+
+class Solution {
+
+        public int evalRPN(String[] tokens) {
+            int[] ls = new int[tokens.length/2+1];
+            int index = 0;
+            for (String token : tokens) {
+                switch (token) {
+                    case "+":
+                        ls[index - 2] = ls[index - 2] + ls[index - 1];
+                        index--;
+                        break;
+                    case "-":
+                        ls[index - 2] = ls[index - 2] - ls[index - 1];
+                        index--;
+                        break;
+                    case "*":
+                        ls[index - 2] = ls[index - 2] * ls[index - 1];
+                        index--;
+                        break;
+                    case "/":
+                        ls[index - 2] = ls[index - 2] / ls[index - 1];
+                        index--;
+                        break;
+                    default:
+                        ls[index++] = Integer.parseInt(token);
+                        break;
+                }
+            }
+            return ls[0];
+      }
+}
+
+class Solution {
+
+    public int evalRPN(String[] tokens) {
+        Stack<Integer> stack = new Stack<>();
+        for (String token : tokens) {
+            if (token.equals("+")) {
+                stack.add(stack.pop() + stack.pop());
+            } else if (token.equals("-")) {
+                int a = stack.pop();
+                int b = stack.pop();
+                stack.add(b - a);
+            } else if (token.equals("*")) {
+                stack.add(stack.pop() * stack.pop());
+            } else if (token.equals("/")) {
+                int a = stack.pop();
+                int b = stack.pop();
+                stack.add(b / a);
+            } else {
+                stack.add(Integer.parseInt(token));
+            }
+        }
+        return stack.pop();
+    }
+}
+
+
+
+//C++
+
+/*
+    Evaluate RPN, valid operators: +, -, *, /
+
+    Stack, if num push, if operator apply to top 2 nums
+
+    Time: O(n)
+    Space: O(n)
+*/
+
+class Solution {
+public:
+    int evalRPN(vector<string>& tokens) {
+        stack<int> s;
+        unordered_map<string, function<int(int,int)>> map {
+            { "+", std::plus<int>() },
+            { "-", std::minus<int>() },
+            { "*", std::multiplies<int>() },
+            { "/", std::divides<int>() }
+        };
+
+        for (const auto& token : tokens) {
+            const auto& op = map.find(token);
+            if (op != map.end()) {
+                assert(s.size() >= 2);
+                int rhs = s.top(); s.pop();
+                int lhs = s.top(); s.pop();
+                s.push((*op).second(lhs, rhs));
+            } else {
+                s.push(stoi(token));
+            }
+        }
+
+        assert(s.size() == 1);
+        return s.top();
+    }
+};
+
+class Solution {
+public:
+    int evalRPN(vector<string>& tokens) {
+        unordered_map<string, function<int (int, int) > > map = {
+            { "+" , [] (int a, int b) { return a + b; } },
+            { "-" , [] (int a, int b) { return a - b; } },
+            { "*" , [] (int a, int b) { return a * b; } },
+            { "/" , [] (int a, int b) { return a / b; } }
+        };
+        std::stack<int> stack;
+        for (string& s : tokens) {
+            if (!map.count(s)) {
+                stack.push(stoi(s));
+            } else {
+                int op1 = stack.top();
+                stack.pop();
+                int op2 = stack.top();
+                stack.pop();
+                stack.push(map[s](op2, op1));
+            }
+        }
+        return stack.top();
+    }
+};
