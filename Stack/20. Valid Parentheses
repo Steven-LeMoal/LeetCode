@@ -1,0 +1,66 @@
+//Java
+
+class Solution {
+    public boolean isValid(String s) {
+        Stack<Character> stack = new Stack<>();
+        for(char c : s.toCharArray()){
+            switch(c){
+                case ']': if(stack.isEmpty() || stack.pop()!='[') return false; break;
+                case ')': if(stack.isEmpty() || stack.pop()!='(') return false; break;
+                case '}': if(stack.isEmpty() || stack.pop()!='{') return false; break;
+                default: stack.push(c);
+            }
+        }
+        return stack.isEmpty();
+    }
+}
+
+//C++
+
+class Solution {
+public:
+    bool isValid(string s) {
+        int n = s.length();
+        if(n % 2 == 1) return false;
+        
+        stack<char> pack;
+        char c;
+        char top;
+
+        for(int i = 0; i < n; i++){
+            c = s[i];
+            
+            if(c == '(' or c == '{' or c == '['){
+                pack.push(c);
+            }
+            else{
+                //check if empty to see if we have a least one parenthese like ( , { or [
+                if(!pack.empty()){
+                    //we create a function isMatch to make the code modular
+                    if(isMatch(pack.top(),c)){
+                        //we remove the last added character if we find the match
+                        pack.pop();
+                    }
+                    else{
+                        return false;
+                    }
+                }
+                else{
+                    return false;
+                }
+            }
+        }
+        
+        //check if empty because we could have ( , { or [ if 'unclosed'
+        return pack.empty();
+    }
+    
+    bool isMatch(char c1, char c2){
+        if(c1 == '(') return c2 == ')';
+        else if(c1 == '{') return c2 == '}';
+        else if(c1 == '[') return c2 == ']';
+
+        return false;
+    }
+
+};
