@@ -1,0 +1,120 @@
+//Python
+
+Solution 1: Brute Force
+Ignoring the sorted property of matrix, the problem boils down to "Is target in matrix?". Hence, we just need to loop through matrix to find target.
+
+class Solution:
+    def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+        return any(target in row for row in matrix)
+TC: O(mn), where m is the number of rows and n is the number of columns in matrix.
+SC: O(1).
+
+Solution 2: 1D Brute Force
+This solution is the same as last solution, except that taking the sorted property of matrix into account, the solution searches for the appropriate row first, before finding target in that row.
+
+class Solution:
+    def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+        for row in matrix:
+            if row[-1] >= target:
+                return target in row
+        return False
+TC: O(m+n), since the nested target in row check is only performed once in an otherwise linear search.
+SC: O(1).
+
+//Java
+
+//Staircase search O(m + n)
+class Solution {
+    public boolean searchMatrix(int[][] matrix, int target) {
+      int i = 0, j = matrix[0].length - 1;
+      while(i < matrix.length && j >= 0) {
+        if(matrix[i][j] == target)
+          return true;
+        else if(matrix[i][j] > target)
+          j --;
+        else if(matrix[i][j] < target)
+          i ++;
+      }
+      return false;
+    }
+}
+
+//Binary O(log(mn))
+public class Solution {
+        public boolean searchMatrix(int[][] matrix, int target) {
+            if (matrix == null || matrix.length == 0) {
+                return false;
+            }
+            int start = 0, rows = matrix.length, cols = matrix[0].length;
+            int end = rows * cols - 1;
+            while (start <= end) {
+                int mid = (start + end) / 2;
+                if (matrix[mid / cols][mid % cols] == target) {
+                    return true;
+                } 
+                if (matrix[mid / cols][mid % cols] < target) {
+                    start = mid + 1;
+                } else {
+                    end = mid - 1;
+                }
+            }
+            return false;
+        }
+    }
+
+//C++
+
+class Solution {
+public : bool searchMatrix(vector<vector<int>>& matrix, int target)
+    {
+        if (matrix.size() == 0 || matrix[0].size() == 0)
+        {
+            return false;
+        }
+
+        int low;
+        int high;
+
+        // first search in first column, use binary search
+        for (low = 0, high = matrix.size() - 1; low <= high;)
+        {
+            int middle = (low + high) / 2;
+            if (matrix[middle][0] < target)
+            {
+                low = middle + 1;
+            }
+            else if (matrix[middle][0] > target)
+            {
+                high = middle - 1;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        // when above loop ends, search in row[high]
+        int row = high;
+        if (row >= 0)
+        {
+            for (low = 0, high = matrix[row].size() - 1; low <= high;)
+            {
+                int middle = (low + high) / 2;
+                if (matrix[row][middle] < target)
+                {
+                    low = middle + 1;
+                }
+                else if (matrix[row][middle] > target)
+                {
+                    high = middle - 1;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+};
