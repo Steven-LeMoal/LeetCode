@@ -1,0 +1,116 @@
+Will later add a segment tree (dac) approach..
+
+//Python
+
+class Solution:
+    def largestRectangleArea(self, height):
+        height.append(0)
+        stack = [-1]
+        ans = 0
+        for i in xrange(len(height)):
+            while height[i] < height[stack[-1]]:
+                h = height[stack.pop()]
+                w = i - stack[-1] - 1
+                ans = max(ans, h * w)
+            stack.append(i)
+        height.pop()
+        return ans
+
+
+
+//Java
+
+public class Solution {
+    public int largestRectangleArea(int[] h) {
+        int n = h.length;
+        int max = 0;
+        int[] stack = new int[n + 1];
+        int is = -1;
+        for (int i = 0; i <= n; i++) {
+            int height = (i == n) ? 0 : h[i];
+            while (is != -1 && height < h[stack[is]]) {
+                int hh = h[stack[is--]];
+                int width = (is == -1) ? i : i - 1 - stack[is];
+                max = Math.max(max, hh * width);
+            }
+            stack[++is] = i;
+        }
+        return max;
+    }
+}
+
+public class Solution {
+    public static int largestRectangleArea(int[] height) {
+        if (height == null || height.length == 0) {
+            return 0;
+        }
+        int[] lessFromLeft = new int[height.length]; // idx of the first bar the left that is lower than current
+        int[] lessFromRight = new int[height.length]; // idx of the first bar the right that is lower than current
+        lessFromRight[height.length - 1] = height.length;
+        lessFromLeft[0] = -1;
+
+        for (int i = 1; i < height.length; i++) {
+            int p = i - 1;
+
+            while (p >= 0 && height[p] >= height[i]) {
+                p = lessFromLeft[p];
+            }
+            lessFromLeft[i] = p;
+        }
+
+        for (int i = height.length - 2; i >= 0; i--) {
+            int p = i + 1;
+
+            while (p < height.length && height[p] >= height[i]) {
+                p = lessFromRight[p];
+            }
+            lessFromRight[i] = p;
+        }
+
+        int maxArea = 0;
+        for (int i = 0; i < height.length; i++) {
+            maxArea = Math.max(maxArea, height[i] * (lessFromRight[i] - lessFromLeft[i] - 1));
+        }
+
+        return maxArea;
+    }
+}
+
+//C++
+
+public class Solution {
+    public static int largestRectangleArea(int[] height) {
+        if (height == null || height.length == 0) {
+            return 0;
+        }
+        int[] lessFromLeft = new int[height.length]; // idx of the first bar the left that is lower than current
+        int[] lessFromRight = new int[height.length]; // idx of the first bar the right that is lower than current
+        lessFromRight[height.length - 1] = height.length;
+        lessFromLeft[0] = -1;
+
+        for (int i = 1; i < height.length; i++) {
+            int p = i - 1;
+
+            while (p >= 0 && height[p] >= height[i]) {
+                p = lessFromLeft[p];
+            }
+            lessFromLeft[i] = p;
+        }
+
+        for (int i = height.length - 2; i >= 0; i--) {
+            int p = i + 1;
+
+            while (p < height.length && height[p] >= height[i]) {
+                p = lessFromRight[p];
+            }
+            lessFromRight[i] = p;
+        }
+
+        int maxArea = 0;
+        for (int i = 0; i < height.length; i++) {
+            maxArea = Math.max(maxArea, height[i] * (lessFromRight[i] - lessFromLeft[i] - 1));
+        }
+
+        return maxArea;
+    }
+}
