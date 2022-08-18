@@ -1,0 +1,99 @@
+link for more detail about binary search : https://leetcode.com/problems/koko-eating-bananas/discuss/769702/Python-Clear-explanation-Powerful-Ultimate-Binary-Search-Template.-Solved-many-problems.
+
+//Python
+
+class Solution:
+    def minEatingSpeed(self, piles, H):
+        lo, hi = 1, max(piles)
+        
+        while lo <= hi:
+            K = lo + ((hi - lo) >> 1)
+            if self.countTimeEatAllAtSpeed(K, piles) <= H:  # count time to eat all bananas at speed K
+                hi = K - 1
+            else:
+                lo = K + 1
+        return lo
+    
+    def countTimeEatAllAtSpeed(self, K, piles):
+        countHours = 0  # hours take to eat all bananas
+        
+        for pile in piles:
+            countHours += pile / K
+            if pile % K != 0:
+                countHours += 1
+        return countHours
+        
+//Java
+
+class Solution {
+    public int minEatingSpeed(int[] piles, int H) {
+        int l = 1, r = getMaxPile(piles);
+        while (l < r) {
+            int m = (l + r) / 2, total = 0;
+            for (int p : piles)
+                total += (p + m - 1) / m;
+                //ceil(p/m) == (p + m - 1)/ m
+            
+            if (total > H)
+                l = m + 1;
+            else
+                r = m;
+        }
+        return l;
+    }
+    
+    private int getMaxPile(int[] piles) {
+        int maxPile = Integer.MIN_VALUE;
+        for (int pile : piles) {
+            maxPile = Math.max(pile, maxPile);
+        }
+        return maxPile;
+    }
+}
+
+//C++
+
+class Solution {
+    // Helper function which returns the number of hours required to consume the piles for given K
+    int hoursRequired(const vector<int> &piles, int k)
+    {
+        int h = 0;
+        if(k == 0) return INT_MAX;
+        for(int i : piles)
+        {
+            if(i % k != 0)
+            {
+                h++;
+            }
+            h += (i / k);
+        }
+        return h;
+    }
+    
+public:
+    int minEatingSpeed(vector<int>& piles, int H) {
+        long long sum = 0;
+        int mx = 0;
+        for(int i = 0; i < piles.size(); i++)
+        {
+            sum += piles[i];
+            mx = max(mx, piles[i]);
+        }
+        int l = sum / H, r = mx, ans;
+        while(l < r)
+        {
+            int mid = l + (r - l) / 2;
+            int ans = hoursRequired(piles, mid);
+			// If hours required is greater than our limit, ignore mid
+            if(ans > H)
+            {
+                l = mid + 1;
+            }
+            else
+            {
+                r = mid;
+            }
+        }
+        return r;
+    }
+};
