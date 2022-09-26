@@ -99,6 +99,76 @@ class Solution {
     }
 }
 
+Example 1:
+
+head : 1 -> 2 -> 3 -> None
+output : 3 -> 2 -> 1 -> None
+The ideal of Pointer is important for understanding linklist.
+
+In recursive solution we need to break down the reverseList function to two parts:
+
+base case: when the input reach this point will ruturn to avoid stack overflow.
+When head or head.next is None, then return head.
+A set of rules to break down the original problem to subproblems.
+Redirect current head.next.next to itself.
+For example: After the first return from base case, p -> 3 -> None and current head -> 2 -> 3 -> None. What we do here is move link from "3 point to None" to "3 point to 2".
+Then current head : 2 <-> 3
+Redirect current head.next to None.
+Move link from "2 point to 3" to "2 point to None".
+Then p -> 3 -> 2 -> None
+call reverseList(head) (Here the head = 1 -> 2 -> 3 -> None)
+	
+	p = reverseList(head.next) (Here the head.next = 2 -> 3 -> None)
+	
+		p = reverseList(head.next) (Here the head.next = 3 -> None)
+			head = 3 -> None
+			match with base case return 3 -> None
+		p = 3 -> None (Here you can see there is a new point, p, point to 3 -> None)
+		
+					p
+					↓
+		head = 2 -> 3 -> None
+				figure 1
+		
+		head.next.next = head (Here you redirect 2.next.next to 2, which means redirect 3.next to 2.)
+		
+					p
+		            ↓
+		head = 2 -> 3
+			   ↑    ↓
+			    <---
+			figure 2
+				 
+		head.next = head (Here you redirect 2.next from 3 to None)
+		
+					p
+		            ↓
+		head = 2 <- 3
+			   ↓
+			  None
+			figure 3
+			  
+		return 3 -> 2 -> None
+	p = 3 -> 2 -> None
+	head.next.next = head (Here you redirect 1.next.next to 1, which means redirect 2.next to 1)
+	
+			   p    1 <-
+		       ↓    ↓   ↑
+		head = 3 -> 2 -> 
+			figure 4
+
+	head.next = head (Here you redirect 1.next from 2 to None)
+	
+	
+			   p    
+		       ↓    
+		head = 3 -> 2 -> 1 -> None
+				figure 5
+	
+	return 3 -> 2 -> 1 -> None
+output: 3 -> 2 -> 1 -> None
+
+
 //C++
 
 class Solution {
