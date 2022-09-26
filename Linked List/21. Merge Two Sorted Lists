@@ -1,0 +1,240 @@
+My first solution is an iterative one. One thing deserves discussion is whether we should create a new ListNode as a convenient way to hold the list. Sometimes, in industrial projects, sometimes it's not trivial to create a ListNode which might require many resource allocations or inaccessible dependencies (we need to mock them).
+
+So ideally, we should pick up either the head of l1 or l2 as the head other than creating a new one, which however makes the initialization step tedious.
+
+But during an interview, I would rather create a new ListNode as list holder, but communicate with the interviewer that I'm aware of the potential issue, and would improve it if he/she thinks this is a big deal.
+
+My second solution is to use recursion. Personally, I don't like this approach. Because in real life, the length of a linked list could be much longer than we expected, in which case the recursive approach is likely to introduce a stack overflow. (Imagine a file system)
+
+But anyway, as long as we communicate this concerning properly with the interviewer, I don't think it's a big deal here.
+
+We're just creating a fixed amount of dummy nodes (1 node). So that's O(1). It would also be O(1) if we had to create 1000 nodes every time because the space complexity tells us how the memory grows with the input, so it doesn't mind if the input is huge or small, we always create the same number of nodes. 
+If we had to create 1 node for each node in the input linked list, that would be O(n), because the memory grows depending on the input linked list.
+But we're ALWAYS creating 1 node so that's O(1). Hope that helps.
+
+
+//Python
+
+Time: O(n)
+Space: O(1)
+
+class Solution:
+    def mergeTwoLists(self, list1: Optional[ListNode], list2: Optional[ListNode]) -> Optional[ListNode]:
+        cur = dummy = ListNode()
+        while list1 and list2:               
+            if list1.val < list2.val:
+                cur.next = list1
+                list1, cur = list1.next, list1
+            else:
+                cur.next = list2
+                list2, cur = list2.next, list2
+                
+        if list1 or list2:
+            cur.next = list1 if list1 else list2
+            
+        return dummy.next
+
+class Solution:
+    def mergeTwoLists(self, list1: Optional[ListNode], list2: Optional[ListNode]) -> Optional[ListNode]:
+        
+        def helper(list1, list2):
+            if(list1 == None): return list2
+            if(list2 == None): return list1
+        
+            if(list1.val <= list2.val):
+                list1.next = helper(list1.next, list2)
+                return list1
+            else:
+                list2.next = helper(list1, list2.next)
+                return list2
+
+        return helper(list1, list2)
+
+//Java
+
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode() {}
+ *     ListNode(int val) { this.val = val; }
+ *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+ * }
+ */
+class Solution {
+   public ListNode mergeTwoLists(ListNode list1, ListNode list2) {
+    
+    if(list2==null) return list1;
+    if(list1==null) return list2;
+    
+    if(list1.val < list2.val) {
+        return mergeTwoListsUtil(list1, list2);
+    }
+    return mergeTwoListsUtil(list2, list1);
+}
+
+ public ListNode mergeTwoListsUtil(ListNode list1, ListNode list2) {
+            
+    ListNode curr1 = list1;
+    ListNode curr2 = list2;
+    ListNode next1 = list1.next;
+    
+    while(next1!= null && curr2!=null) {
+        if(curr1.val <= curr2.val && curr2.val <= next1.val) {
+            ListNode next2 = curr2.next;
+            curr1.next = curr2;
+            curr2.next = next1;
+            curr2  = next2;
+        } 
+        else{
+            next1 = next1.next;
+        }
+        curr1 = curr1.next;
+    }
+     
+     if(curr2!=null) {
+         curr1.next = curr2;
+     }
+     
+     return list1;
+ }
+}
+
+//C++
+
+EXPLANATION
+
+Maintain a head and a tail pointer on the merged linked list.
+
+Then choose the head of the merged linked list by comparing the first node of both linked lists.
+
+For all subsequent nodes in both lists, you choose the smaller current node and link it to the tail of the merged list, and moving the current pointer of that list one step forward.
+
+You keep doing this while there are some remaining elements in both the lists.
+
+If there are still some elements in only one of the lists, you link this remaining list to the tail of the merged list.
+
+Initially, the merged linked list is NULL.
+
+Compare the value of the first two nodes and make the node with the smaller value the head node of the merged linked list.
+
+Since it’s the first and only node in the merged list, it will also be the tail.
+
+Then move head1 one step forward.
+
+RECURSIVE APPROACH
+
+class Solution {
+public:
+    ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {
+       
+	    // if list1 happen to be NULL
+		// we will simply return list2.
+        if(list1 == NULL)
+            return list2;
+		
+		// if list2 happen to be NULL
+		// we will simply return list1.
+        if(list2 == NULL)
+            return list1;
+        
+        ListNode * ptr = list1;
+        if(list1 -> val > list2 -> val)
+        {
+            ptr = list2;
+            list2 = list2 -> next;
+        }
+        else
+        {
+            list1 = list1 -> next;
+        }
+        ListNode *curr = ptr;
+        
+		// till one of the list doesn't reaches NULL
+        while(list1 &&  list2)
+        {
+            if(list1 -> val < list2 -> val){
+                curr->next = list1;
+                list1 = list1 -> next;
+            }
+            else{
+                curr->next = list2;
+                list2 = list2 -> next;
+            }
+            curr = curr -> next;
+                
+        }
+		
+		// adding remaining elements of bigger list.
+        if(!list1)
+            curr -> next = list2;
+        else
+            curr -> next = list1;
+            
+        return ptr;
+       
+    }
+};
+
+class Solution {
+public:
+    ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {
+        ListNode *dummy, *temp;
+        dummy = new ListNode();
+        temp = dummy;
+        
+        //when both list1 and list2 isn't empty
+        while(list1 && list2){
+            if(list1->val < list2->val){
+                temp->next = list1;
+                list1 = list1->next;
+            }
+            else{
+                temp->next = list2;
+                list2 = list2->next;   
+            }
+            temp = temp->next;
+        }
+        
+        // we reached at the end of one of the list
+        if(list1) temp->next = list1;
+        if(list2) temp->next = list2;
+        
+        return dummy->next;
+    }
+};
+
+class Solution {
+public:
+	ListNode* mergeTwoLists(ListNode* l1, ListNode* l2) 
+  {
+		// if list1 happen to be NULL
+		// we will simply return list2.
+		if(l1 == NULL)
+        {
+			return l2;
+		}
+		
+		// if list2 happen to be NULL
+		// we will simply return list1.
+		if(l2 == NULL)
+        {
+			return l1;
+		} 
+		
+		// if value pointend by l1 pointer is less than equal to value pointed by l2 pointer
+		// we wall call recursively l1 -> next and whole l2 list.
+		if(l1 -> val <= l2 -> val)
+        {
+			l1 -> next = mergeTwoLists(l1 -> next, l2);
+			return l1;
+		}
+		// we will call recursive l1 whole list and l2 -> next
+		else
+        {
+			l2 -> next = mergeTwoLists(l1, l2 -> next);
+			return l2;            
+		}
+	}
+};	
