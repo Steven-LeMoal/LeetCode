@@ -1,0 +1,127 @@
+//Python
+//v1
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        if head:
+            result = ListNode(head.val)
+
+            while(head.next):
+                result = ListNode(head.next.val, result)
+                head = head.next
+
+            return result
+        return None
+//v2     
+class Solution:
+    def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        # Initialize prev pointer as NULL...
+        prev = None
+        # Initialize the curr pointer as the head...
+        curr = head
+        # Run a loop till curr points to NULL...
+        while curr:
+            # Initialize next pointer as the next pointer of curr...
+            next = curr.next
+            # Now assign the prev pointer to curr’s next pointer.
+            curr.next = prev
+            # Assign curr to prev, next to curr...
+            prev = curr
+            curr = next
+        return prev       # Return the prev pointer to get the reverse linked list...       
+//v3
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        def helper(nexto, prev):
+            if(nexto.next):
+                res = ListNode(nexto.next.val, prev)
+                return helper(nexto.next, res)
+            return prev
+        
+        if head:
+            return helper(head, ListNode(head.val))
+        return None
+//v4       
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+class Solution:
+    def reverseList(self, head):
+        if (not head) or (not head.next):
+            return head
+        
+        p = self.reverseList(head.next)
+        head.next.next = head
+        head.next = None
+        return p
+
+if __name__ == "__main__":
+    head = ListNode(1, ListNode(2, ListNode(3, ListNode(4, ListNode(5)))))
+    solution = Solution()
+    Result = solution.reverseList(head)
+
+    print(Result.val, Result.next.val, Result.next.next.val, Result.next.next.next.val, Result.next.next.next.next.val)```
+        
+//Java
+
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode() {}
+ *     ListNode(int val) { this.val = val; }
+ *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+ * }
+ */
+class Solution {
+    public ListNode reverseList(ListNode head) {
+        // Special case...
+        if (head == null || head.next == null) return head;
+        // Create a new node to call the function recursively and we get the reverse linked list...
+        ListNode res = reverseList(head.next);
+        // Set head node as head.next.next...
+        head.next.next = head;
+        //set head's next to be null...
+        head.next = null;
+
+        return res;     // Return the reverse linked list...
+    }
+}
+
+//C++
+
+class Solution {
+public:
+    ListNode* reverseList(ListNode* head) {
+        // Special case...
+        if(head == NULL || head->next == NULL)  return head;
+        // Initialize prev pointer as the head...
+        ListNode* prev = head;
+        // Initialize curr pointer as the next pointer of prev...
+        ListNode* curr = prev->next;
+        // Initialize next of head pointer as NULL...
+        head->next = NULL;
+        // Run a loop till curr and prev points to NULL...
+        while(prev != NULL && curr != NULL){
+            // Initialize next pointer as the next pointer of curr...
+            ListNode* next = curr->next;
+            // Now assign the prev pointer to curr’s next pointer.
+            curr->next = prev;
+            // Assign curr to prev, next to curr...
+            prev = curr;
+            curr = next;
+        }
+        return prev;    // Return the prev pointer to get the reverse linked list...
+    }
+};
