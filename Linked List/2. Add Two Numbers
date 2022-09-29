@@ -1,0 +1,159 @@
+https://leetcode.com/problems/add-two-numbers/discuss/1340/A-summary-about-how-to-solve-Linked-List-problem-C%2B%2B
+
+//Python
+
+class Solution:
+    def addTwoNumbers(self, l1: ListNode, l2: ListNode) -> ListNode:
+        dummy = ListNode()
+        cur = dummy
+
+        carry = 0
+        while l1 or l2 or carry:
+            v1 = l1.val if l1 else 0
+            v2 = l2.val if l2 else 0
+
+            # new digit
+            val = v1 + v2 + carry
+            carry = val // 10
+            val = val % 10
+            cur.next = ListNode(val)
+
+            # update ptrs
+            cur = cur.next
+            l1 = l1.next if l1 else None
+            l2 = l2.next if l2 else None
+
+        return dummy.next
+  
+class Solution:
+    def addTwoNumbers(self, l1: ListNode, l2: ListNode) -> ListNode:
+        start = curr = ListNode(0)
+        carry = 0
+        while(l1 or l2 or carry):
+            x = l1.val if l1 else 0
+            y = l2.val if l2 else 0
+            
+            carry, val = divmod(x + y + carry, 10)
+            curr.next = ListNode(val)
+            curr = curr.next
+            
+            l1 = l1.next if l1 else None
+            l2 = l2.next if l2 else None
+        
+        return start.next
+        
+        
+  //Java - Optimised
+
+class Solution {
+    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+        
+        l1.val=l2.val+l1.val;
+        if(l1.val>=10){
+            addone(l1);
+        }
+        if(l1.next!=null && l2.next!=null){
+            addTwoNumbers(l1.next,l2.next);}
+        if(l1.next==null && l2.next!=null){
+            l1.next=l2.next;
+        }
+        
+        return l1;
+    }
+    
+    public void addone(ListNode t1){
+        if(t1.val>=10){
+           t1.val=t1.val-10;
+        
+            if(t1.next!=null){
+                 t1.next.val++;
+                addone(t1.next);
+            }
+            else if(t1.next==null){
+            ListNode newone = new ListNode(1);
+            t1.next=newone;
+            }
+        }
+        
+    }
+}
+
+class Solution {
+    
+    int carry = 0;
+    
+    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+        
+        if (l1 == null && l2 == null && carry == 0) {
+            return null;
+        }
+        
+        int val1 = l1 == null ? 0 : l1.val;
+        int val2 = l2 == null ? 0 : l2.val;
+        
+        int sum = val1 + val2 + carry;
+        carry = sum/10;
+        
+        l1 = l1 == null ? null : l1.next;
+        l2 = l2 == null ? null : l2.next;
+        
+        ListNode ans = new ListNode(sum%10, addTwoNumbers(l1, l2));
+        
+        return ans;
+    }
+}
+
+
+  //C++
+  
+class Solution {
+public:
+    ListNode* add(ListNode*l1,ListNode*l2,int carry){
+        if(l1==NULL && l2==NULL && carry==0) return NULL;
+        int sum=carry;
+        sum+=l1==NULL?0:l1->val;
+        sum+=l2==NULL?0:l2->val;
+        ListNode*newNode=new ListNode(sum%10);
+        carry=sum/10;
+        if(l1) l1=l1->next;
+        if(l2) l2=l2->next;
+        newNode->next=add(l1,l2,carry);
+        return newNode;
+    }
+    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
+        return add(l1,l2,0);
+    }
+};
+        
+class Solution {
+    
+public:
+
+    ListNode *addTwoNumbers(ListNode *l1, ListNode *l2)
+    {
+        ListNode stackAnchor(0);
+        ListNode* tail = &stackAnchor;
+
+        div_t sum = { 0, 0 };
+        while(sum.quot > 0 || l1 || l2)
+        {
+            if (l1)
+            {
+                sum.quot += l1->val;
+                l1 = l1->next;
+            }
+            if (l2)
+            {
+                sum.quot += l2->val;
+                l2 = l2->next;
+            }
+            sum = div(sum.quot, 10);
+            
+            tail->next = new ListNode(sum.rem);
+            tail = tail->next;
+        }
+
+        return stackAnchor.next;
+    }
+    
+};
