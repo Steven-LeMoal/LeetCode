@@ -1,0 +1,130 @@
+Idea:
+With a singly linked list, the only way to find the end of the list, and thus the n'th node from the end, is to actually iterate all the way to the end. The challenge here is attemping to find the solution in only one pass. A naive approach here might be to store pointers to each node in an array, allowing us to calculate the n'th from the end once we reach the end, but that would take O(M) extra space, where M is the length of the linked list.
+
+A slightly less naive approach would be to only store only the last n+1 node pointers in the array. This could be achieved by overwriting the elements of the storage array in circlular fashion as we iterate through the list. This would lower the space complexity to O(N+1).
+
+In order to solve this problem in only one pass and O(1) extra space, however, we would need to find a way to both reach the end of the list with one pointer and also reach the n'th node from the end simultaneously with a second pointer.
+
+To do that, we can simply stagger our two pointers by n nodes by giving the first pointer (fast) a head start before starting the second pointer (slow). Doing this will cause slow to reach the n'th node from the end at the same time that fast reaches the end.
+
+
+Since we will need access to the node before the target node in order to remove the target node, we can use fast.next == null as our exit condition, rather than fast == null, so that we stop one node earlier.
+
+This will unfortunately cause a problem when n is the same as the length of the list, which would make the first node the target node, and thus make it impossible to find the node before the target node. If that's the case, however, we can just return head.next without needing to stitch together the two sides of the target node.
+
+Otherwise, once we succesfully find the node before the target, we can then stitch it together with the node after the target, and then return head.
+
+
+Bruteforce method in C++ section
+
+
+//Python
+
+class Solution:
+    def removeNthFromEnd(self, head: ListNode, n: int) -> ListNode:
+        fast, slow = head, head
+        for _ in range(n): fast = fast.next
+        if not fast: return head.next
+        while fast.next: fast, slow = fast.next, slow.next
+        slow.next = slow.next.next
+        return head
+
+//Java
+
+class Solution {
+    public ListNode removeNthFromEnd(ListNode head, int n) {
+        ListNode fast = head, slow = head;
+        for (int i = 0; i < n; i++) fast = fast.next;
+        if (fast == null) return head.next;
+        while (fast.next != null) {
+            fast = fast.next;
+            slow = slow.next;
+        }
+        slow.next = slow.next.next;
+        return head;
+    }
+}
+
+//C++
+
+including deallocation
+
+istNode* removeNthFromEnd(ListNode* head, int n) {
+      //BruteForce Method
+      //Time Complexity :- O(n) + O(n) = O(2*n) [Two Pass]
+      //Space Complexity:- O(1)
+       
+      //Counting the number of nodes in the linked list.       
+      ListNode *temp=head;
+      int countNodes=0;
+      while(temp!=NULL)
+      {
+          countNodes++;
+          temp=temp->next;
+      }
+        
+      //Checking the edge case when the 'n' i.e. node to be deleted
+      //from end of the list is equal to the number of nodes in the 
+      //linked list.
+      /*For Example :- 
+                       Input : [7,4] , n=2
+                       Output: [4]
+      */
+      if(countNodes==n)
+      {
+          ListNode *node=head;
+          head=head->next;
+          delete node;
+          return head;
+      }
+        
+      //If the node to be deleted is not the head of the list then we have 
+      //to reach one node before it.         
+      int difference = countNodes - n;
+      int counter=1;
+      temp=head;
+      while(counter!=difference)
+      {
+          counter++;
+          temp=temp->next;
+      }
+        
+      //The main logic to delete the nth node from the end.       
+      ListNode *node=temp->next;
+      temp->next=node->next;
+      delete node;
+        
+      return head;
+    }
+
+class Solution {
+public:
+    ListNode* removeNthFromEnd(ListNode* head, int n) {
+        ListNode* slow = head;
+        ListNode* fast = head;
+        
+        for(int i=0; i<n; i++) {
+            fast = fast->next;
+        }
+        
+        if(!fast) {
+            ListNode* temp = head;
+            head = head->next;
+            temp->next = NULL;
+            delete temp;
+            return head;
+        }
+        
+        while(fast->next) {
+            slow = slow->next;
+            fast = fast->next;
+        }
+        
+        ListNode* temp = slow->next;
+        slow->next = slow->next->next;
+        temp->next = NULL;
+        delete temp;
+        
+        return head;
+    }
+};
