@@ -1,0 +1,337 @@
+Let's Do some math work. To understand this solution, you just need to ask yourself this question.
+
+Assume the distance from head to the start of the loop is x1
+the distance from the start of the loop to the point fast and slow meet is x2
+the distance from the point fast and slow meet to the start of the loop is x3
+
+What is the distance fast moved? What is the distance slow moved? And their relationship?
+
+x1 + x2 + x3 + x2
+x1 + x2
+x1 + x2 + x3 + x2 = 2 (x1 + x2)
+Q: Now your question Why x1 + x2 + x3 + x2 = 2 (x1 + x2)?
+
+Ans: Its just the relationship between the distance travelled by fast pointer and the distance travelled by the slow pointer.
+As fast pointer, runs twice the speed of slow pointer. Therefore, when they meet, distance travelled by fast pointer will be 2*(distance travelled by slow pointer).
+
+Therefore, x1 = x3.
+
+or
+
+To compute the intersection point, let's note that the hare has traversed twice as many nodes as the tortoise, i.e. 2d(tortoise)=d(hare), implying:
+
+2(F + a) = F + nC + a    , where n is some integer.
+
+Hence the coordinate of the intersection point is F + a = nC.  (nC - a : distance from intersection to start of circle ; F : distance start and start of circle)
+
+
+
+In phase 2, we give the tortoise a second chance by slowing down the hare, so that it now moves at the speed of tortoise: tortoise = nums[tortoise], hare = nums[hare]. 
+The tortoise is back at the starting position, and the hare starts from the intersection point.
+
+Let's show that this time they meet at the cycle entrance after F steps.
+
+The tortoise started at zero, so its position after F steps is F.
+
+The hare started at the intersection point F + a = nC
+F+a=nC, so its position after F steps is nC + F, that is the same point as F.
+
+So the tortoise and the (slowed down) hare will meet at the entrance of the cycle.
+
+
+
+//Python
+
+class Solution:
+    def findDuplicate(self, nums):
+        # Find the intersection point of the two runners.
+        tortoise = hare = nums[0]
+        while True:
+            tortoise = nums[tortoise]
+            hare = nums[nums[hare]]
+            if tortoise == hare:
+                break
+        
+        # Find the "entrance" to the cycle.
+        tortoise = nums[0]
+        while tortoise != hare:
+            tortoise = nums[tortoise]
+            hare = nums[hare]
+        
+        return hare
+
+
+//Java
+
+Brute Force (2 Loops)
+Since solve the problem without modifying the array nums and uses only constant extra space, we can use Brute Force to solve it.
+
+It's easy to use 2 loops to do it, but the time complexity is O(n^2), so it wouldn't accepted as timeout.
+
+    // 2 Loops
+    public static int findDuplicate_2loops(int[] nums) {
+        int len = nums.length;
+        for (int i = 0; i < len; i++) {
+            for (int j = i + 1; j < len; j++) {
+                if (nums[i] == nums[j]) {
+                    return nums[i];
+                }
+            }
+        }
+
+        return len;
+    }
+Analysis
+Time Complexity: O(n^2)
+Space Complexity: O(1)
+
+Count
+Count the frequency of the num in the array.
+
+With extra O(n) space, without modifying the input.
+
+    public static int findDuplicate(int[] nums) {
+        int len = nums.length;
+        int[] cnt = new int[len + 1];
+        for (int i = 0; i < len; i++) {
+            cnt[nums[i]]++;
+            if (cnt[nums[i]] > 1) {
+                return nums[i];
+            }
+        }
+
+        return len;
+    }
+Analysis
+Time Complexity: O(n)
+Space Complexity: O(n)
+
+Hash
+Using a HashSet to record the occurrence of each number.
+
+With extra O(n) space, without modifying the input.
+
+    public static int findDuplicate_set(int[] nums) {
+        Set<Integer> set = new HashSet<>();
+        int len = nums.length;
+        for (int i = 0; i < len; i++) {
+            if (!set.add(nums[i])) {
+                return nums[i];
+            }
+        }
+
+        return len;
+    }
+Analysis
+Time Complexity: O(n)
+Space Complexity: O(n)
+
+Marking visited value within the array
+Since all values of the array are between [1..n] and the array size is n+1，while scanning the array from left to right, we set the nums[n] to its negative value.
+
+With extra O(1) space, with modifying the input.
+
+    // Visited
+    public static int findDuplicate_mark(int[] nums) {
+        int len = nums.length;
+        for (int num : nums) {
+            int idx = Math.abs(num);
+            if (nums[idx] < 0) {
+                return idx;
+            }
+            nums[idx] = -nums[idx];
+        }
+
+        return len;
+    }
+Analysis
+Time Complexity: O(n)
+Space Complexity: O(1)
+
+Sort
+Sorting the array first, then use a loop scanning from 1 to n.
+
+With extra O(logn) space, with modifying the input.
+
+    public static int findDuplicate_sort(int[] nums) {
+        Arrays.sort(nums);
+        int len = nums.length;
+        for (int i = 1; i < len; i++) {
+            if (nums[i] == nums[i - 1]) {
+                return nums[i];
+            }
+        }
+
+        return len;
+    }
+Analysis
+Time Complexity: O(nlogn)
+Space Complexity: O(logn)
+
+Index Sort
+If the array is sorted, the value of each array element is its index value index + 1, then we can do this:
+
+If nums[i] == i + 1, it means that the order has been sorted, then skip, i++;
+If nums[i] == nums[nums[i] - 1], it means that there is already a value at the correct index, then this value is a duplicated element;
+If none of the above is satisfied, exchange the values of nums[i] and nums[nums[i] - 1].
+With extra O(logn) space, with modifying the input.
+
+    // Index Sort
+    // n+ 1 numbers in n.
+    public static int findDuplicate_index_sort(int[] nums) {
+        int len = nums.length;
+        for (int i = 0; i < len; ) {
+            int n = nums[i];
+            if (n == i + 1) {
+                i++;
+            } else if (n == nums[n - 1]) {
+                return n;
+            } else {
+                nums[i] = nums[n - 1];
+                nums[n - 1] = n;
+            }
+        }
+
+        return 0;
+    }
+Analysis
+Time Complexity: O(n)
+Space Complexity: O(1)
+
+Binary Search
+Note that the key is to find an integer in the array [1, 2,.., n] instead of finding an integer in the input array.
+
+We can use the binary search algorithm, each round we guess one number, then scan the input array, narrow the search range, and finally get the answer.
+
+According to the Pigeonhole Principle, n + 1 integers, placed in an array of length n, at least 1 integer will be repeated.
+
+So guess a number first(the number mid in the valid range [left, right]), count the elements of the array which is less than or equal to mid in the array.
+
+If cnt is strictly greater than mid. According to the Pigeonhole Principle, repeated elements are in the interval [left, mid];
+Otherwise, the repeated element is in the interval [mid + 1, right].
+With extra O(1) space, without modifying the input.
+
+class Solution {
+    public int findDuplicate(int[] nums) {
+        int left = 0, right = nums.length;
+        while(left<right){
+            int mid = left + (right-left)/2;
+            int count = 0;
+            for(int i:nums) if(i<=mid) count++;
+            if(count > mid){
+                right = mid;
+            }else{
+                left = mid+1;
+            }
+        }
+        return left;
+    }
+}
+
+//C++
+
+
+class Solution {
+public:
+    // TC: O(N), SC: O(1)
+    /*
+        Since the numbers are [1:N], so we use the array indices for storing the
+        visited state of each number, only the duplicate will be visited twice.
+        For each number we goto its index position and multiply by -1. In case
+        of duplicate it will be multiplied twice and the number will be +ve.
+    */
+    int indexSolution(vector<int>& nums) {
+        for(int i = 0; i < nums.size(); i++) {
+            int index = abs(nums[i]) - 1;
+            
+            // mark as visited
+            nums[index] *= -1;
+            // incase of duplicate, this will become +ve 
+            if(nums[index] > 0)
+                return abs(nums[i]);
+        }    
+        return -1;
+    }
+    
+    // Using Floyd Cycle detection
+    // TC: O(N), SC: O(1)
+    
+    /*
+        Assume each nums value as an address just like in linked list node addr.
+        Then since there is one number whith duplicates, that means there are multiple instances
+        of the same address, so it is a cycle just like in linked list. Do the same thing
+        as in linked list.
+    */
+    int floydSolution(vector<int>& nums) {
+        // Each index is taken 1 based, as if it is zero based, then
+        // for nums[2] = 3, if we goto nums[nums[2] - 1], it is again nums[2]
+        // infinite loop
+        int hare = nums[0], tortoise = nums[0];
+        
+        do {
+            hare = nums[nums[hare]];
+            tortoise = nums[tortoise];
+        } while(hare != tortoise);
+        
+        // to find the starting of cycle, make tortoise to start from begining
+        tortoise = nums[0];
+        while(hare != tortoise) {
+            hare = nums[hare];
+            tortoise = nums[tortoise];
+        }
+        
+        return hare;
+    }
+    
+    // Using Binary search
+    // TC: O(nlogn), SC: O(1)
+    int binarySearchSolution(vector<int>& nums) {
+        // The idea is that it is known that there is a duplicate, so 
+        // we can use pigeon hole concept here. We do binary search on the search
+        // space of [1:N], then count the number of elements <= middle. If the 
+        // duplicate is on the left side, then count should be more than mid,
+        // else it is on the right side. Initially search space is [1: N], then
+        // each time narrow down the search space
+        int left = 1, right = nums.size() - 1;
+        while(left < right) {
+            int mid = left + (right - left) / 2;
+            
+            // count the number of elements smaller/ equal than middle element
+            int c = 0;
+            for(const int& el: nums)
+                if(el <= mid)
+                    ++c;
+            
+            if(c > mid)
+                right = mid;
+            else
+                left = mid + 1;
+        }
+        return left;
+    }
+    
+    // Using Sorting
+    // TC: O(nlogn)
+    int sortingSolution(vector<int>& nums) {
+        // sort the numbers and find the number which has duplicate
+        // by checking the one which has the same at next position
+        sort(nums.begin(), nums.end());
+        
+        int duplicate = 0;
+        for(int i = 0; i < nums.size() - 1; i++)
+            if(nums[i] == nums[i+1]) {
+                duplicate = nums[i];
+                break;
+            }
+        return duplicate;
+    }
+    
+    
+    
+    int findDuplicate(vector<int>& nums) {
+        // return sortingSolution(nums);
+        // return binarySearchSolution(nums);
+        //return floydSolution(nums);
+        return indexSolution(nums);
+    }
+};
