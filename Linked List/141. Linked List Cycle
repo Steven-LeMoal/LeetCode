@@ -1,0 +1,123 @@
+1️⃣ Floyd's Cycle Detection Approach:
+In this question we set two pointer:
+
+slow: move to next pointer each time
+fast: move to next.next pointer each time
+
+Step 1: Traverse slow and fast pointer all the way until they meet
+( If there is no cycle in the linked list the fast pointer will point to None eventually)
+
+Step 2: Return if slow == fast, (if there is no cycle fast will be None)
+
+Math Explained
+Let the whole linked-list's length be n, distance between head and the slow index of the cycle be m,
+The distance between slow index of the cycle and the index where slow and fast pointer meets to be p
+
+We can know that in the step 1: first pointer traverse the distance m+p and the second traverse 2(m + p) and also equals to n+p => n = 2m + p
+Upon this equation if we move second pointer m step it will traverse the linked-list again point at 2m + p which is our target
+
+IF YOU CAN: Better draw a graph and mark these distance so you will know the whole math equation
+Complexity Analysis
+Time: O(N): Let N be the length of linked list
+Space: O(1)
+
+//Python
+
+class Solution:
+    def hasCycle(self, head: Optional[ListNode]) -> bool:
+        if head is None or head.next is None:
+            return False
+        slow = head
+        fast = head.next
+        while fast.next and fast.next.next and slow != fast:
+            slow = slow.next
+            fast = fast.next.next
+        return slow == fast
+
+class Solution:
+    def hasCycle(self, head: Optional[ListNode]) -> bool:
+        while head:
+            if head.val == None:
+                return True
+            head.val = None
+            head = head.next
+        return False
+        
+class Solution:
+    def hasCycle(self, head: Optional[ListNode]) -> bool:
+        try:
+            slow = head
+            fast = head.next
+            while slow is not fast:
+                slow = slow.next
+                fast = fast.next.next
+            return True
+        except:
+            return False
+
+//Java
+
+In Question it is mentioned that total 10^4 nodes are possible 
+so if there is a possiblity of a circular loop then head will never point towards null
+so as the count hits 10^4+1 we know that there is no end to this LinkedList 
+so print True.
+
+public class Solution {
+    public boolean hasCycle(ListNode head){
+        int count = 0;
+        while (head != null) {
+            head = head.next;
+            if (++count == 10001) return true;
+        }
+        return false;
+    }
+}
+
+
+//C++
+
+class Solution {
+public:
+    bool hasCycle(ListNode *head) {
+	ListNode* slow = head;
+	ListNode* fast = head;
+
+	while(slow && fast && fast -> next)
+	{
+		slow = slow -> next;
+		fast  = fast -> next -> next;
+
+		if(slow == fast)
+			return true;
+	}
+
+	return false;
+}
+};
+
+class Solution {
+public:
+    ListNode* reverseList(ListNode* head) 
+        {
+        ListNode* prev = NULL;
+        ListNode* follow = NULL;
+        while (head)
+        {
+            follow = head->next;
+            head->next = prev;
+            prev = head;
+            head = follow;
+        }
+        return prev;
+    }
+    
+    bool hasCycle(ListNode *head)
+    {
+        ListNode* rev = reverseList(head);
+        if (head && head->next && rev == head)
+        {
+            return true;
+        }
+        return false;
+    }
+};
