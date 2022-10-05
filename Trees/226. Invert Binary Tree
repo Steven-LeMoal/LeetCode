@@ -1,0 +1,59 @@
+//Python
+
+class Solution:
+    def invertTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+        
+        if(not root): return None
+        
+        def helper(curr : Optional[TreeNode]) -> bool:
+            if(curr and (curr.left or curr.right)):
+                curr.left, curr.right = curr.right, curr.left
+                return helper(curr.left) and helper(curr.right)
+            return True
+        
+        helper(root)
+        
+        return root
+
+
+# recursively
+def invertTree1(self, root):
+    if root:
+        root.left, root.right = self.invertTree(root.right), self.invertTree(root.left)
+        return root
+        
+# BFS
+def invertTree2(self, root):
+    queue = collections.deque([(root)])
+    while queue:
+        node = queue.popleft()
+        if node:
+            node.left, node.right = node.right, node.left
+            queue.append(node.left)
+            queue.append(node.right)
+    return root
+    
+# DFS
+def invertTree(self, root):
+    stack = [root]
+    while stack:
+        node = stack.pop()
+        if node:
+            node.left, node.right = node.right, node.left
+            #stack.extend([node.right, node.left])
+            for child in [node.left, node.right]:
+                stack.append(child)
+    return root
+
+ou
+
+class Solution:
+    def invertTree(self, root: TreeNode) -> TreeNode:
+        if not root: return None
+        
+        root.left, root.right = root.right, root.left
+        
+        self.invertTree(root.left)
+        self.invertTree(root.right)
+        
+        return root
