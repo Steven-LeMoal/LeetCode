@@ -1,0 +1,105 @@
+//Python
+
+
+class Solution:
+    def reverseKGroup(self, head: Optional[ListNode], k: int) -> Optional[ListNode]:
+        curr = head
+        for _ in range(k):
+            if not curr: return head
+            curr = curr.next
+        prev = None
+        curr = head
+        for _ in range(k):
+            nxt = curr.next
+            curr.next = prev
+            prev = curr
+            curr = nxt
+        head.next = self.reverseKGroup(curr, k)
+        return prev
+        
+        
+class Solution:
+    def reverseListNode(self, head: ListNode):
+        newHead = None
+        newTail = None
+        while head:
+            n = head.next
+            if (not newHead):
+                newHead = head
+                newHead.next = None
+                newTail = newHead
+            else:
+                head.next = newHead
+                newHead = head
+            head = n
+        return newHead, newTail
+    def reverseKGroup(self, head: ListNode, k: int) -> ListNode:
+        pre = l = r = head
+        dummy = jump = ListNode(-1)
+        while r:
+            count = 0
+            while r and count < k:
+                count += 1
+                pre = r
+                r = r.next
+            if count == k:
+                pre.next = None
+                curh, curt = self.reverseListNode(l)
+                jump.next = curh
+                jump = curt
+                l = r
+            else:
+                jump.next = l 
+        return dummy.next
+        
+        
+        
+Use a dummy head, and
+
+l, r : define reversing range
+
+pre, cur : used in reversing, standard reverse linked linked list method
+
+jump : used to connect last node in previous k-group to first node in following k-group
+
+def reverseKGroup(self, head, k):
+    dummy = jump = ListNode(0)
+    dummy.next = l = r = head
+    
+    while True:
+        count = 0
+        while r and count < k:   # use r to locate the range
+            r = r.next
+            count += 1
+        if count == k:  # if size k satisfied, reverse the inner linked list
+            pre, cur = r, l
+            for _ in range(k):
+                cur.next, cur, pre = pre, cur.next, cur  # standard reversing
+            jump.next, jump, l = pre, l, r  # connect two k-groups
+        else:
+            return dummy.next
+            
+            
+The basic idea is rearranging the nodes in a new list. I use p to iterate through the original list, while putting all the nodes behind a new starting node r, and e is used to store the end of the previous group, where new nodes of the next group will be inserted.
+
+def reverseKGroup(self, head: ListNode, k: int) -> ListNode:
+    p = head
+    e = r = ListNode(None)
+
+	# find out the length of the list
+    n = 0
+    while head:
+        head = head.next
+        n += 1
+
+	# rearrange the nodes
+    for i in range(n // k):    # for every group
+        s = p                  # record the first node of a group that will soon become the last node of the reversed group
+        for _ in range(k):     # for every node in a group
+            t = p.next
+            p.next = e.next    # put the current node right before the head of the reversed group
+            e.next = p         # register p as the head of the reversed group
+            p = t              # visit the next node in the original list
+        e = s                  # update the end of the reversed group
+    e.next = p                 # append the tail to the end
+    return r.next
