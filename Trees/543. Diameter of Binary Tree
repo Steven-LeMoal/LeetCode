@@ -1,0 +1,212 @@
+//Python
+
+let length(a,b) = number of edges between nodes a, b
+our objective is to maximize the diameter = maximize path length between two nodes
+
+intuition: recognize that the longest path must include two leaf nodes, towards contradiction suppose longest path of length L starts at node a and ends at node b, we can increase this path by including children of a and b
+
+standard tree question format:
+
+def solution(self, root):
+	def solve(root):
+		if not root:
+			# do something
+		solve(root.left)
+		solve(root.right)
+		return # something
+	solve(root)
+	return # something
+Start by looking at simplest tree case with 1 leaf node (written as [1]), diameter is 0
+Next simplest tree case with parent node 1 and two children 2, 3 (written as [1,2,3], diameter is 2
+
+
+
+
+
+Time complexity of your solution is O(n^2) : 2 recursive functions on each node first to compute the height and the 2nd time to compute the diameter . 
+The trick should be to use a kindof global variable to compute the height in the same call when computing the diameter.
+
+class Solution(object):
+    def diameterOfBinaryTree(self, root):
+        """
+        :type root: TreeNode
+        :rtype: int
+        """
+        return self.diameter(root)
+    
+    def diameter(self, node):
+        if not node:
+            return 0
+		#to calculate heights of left and right subtrees if passing through root	
+        lheight = self.height(node.left)
+        rheight = self.height(node.right)
+		
+		#to calculate within left and right subtree in case the longest path doesn't pass through root
+        ldiameter = self.diameter(node.left)
+        rdiameter =self.diameter(node.right)
+		
+		#since number of edges = number of nodes - 1, I am not considering lheight + rheight + 1
+        return max(lheight + rheight, max(ldiameter, rdiameter)) 
+    
+    def height(self, node):
+        if not node:
+            return 0
+        lheight = self.height(node.left)
+        rheight = self.height(node.right)
+        
+        return max(lheight, rheight) + 1
+
+We can optimise
+
+class Solution(object):
+    def diameterOfBinaryTree(self, root):
+        """
+        :type root: TreeNode
+        :rtype: int
+        """
+        self.ans = 0
+        
+        def depth(p):
+            if not p: return -1
+            left, right = depth(p.left) + 1, depth(p.right) + 1
+            self.ans = max(self.ans, left + right)
+            return max(left, right)
+            
+        depth(root)
+        return self.ans
+        
+class Solution:
+    def diameterOfBinaryTree(self, root: TreeNode) -> int:
+        ans = 0
+        hm = {}
+        stack = [(root, False)]
+        
+        while stack:
+            node, visited = stack.pop()
+            if node:
+                if visited:
+                    lh = 0 if node.left is None else hm.pop(node.left)
+                    rh = 0 if node.right is None else hm.pop(node.right)
+                    ans = max(ans, lh + rh)
+                    hm[node] = max(lh, rh) + 1
+                else:
+                    stack.append((node, True))
+                    stack.append((node.left, False))
+                    stack.append((node.right, False))
+        return ans
+        
+        
+class Solution:
+    def diameterOfBinaryTree(self, root: Optional[TreeNode]) -> int:
+        lp = 0
+        stack = [[root, False]]
+        heights = {}
+        while stack:
+            node, seen = stack[-1]
+            if not seen:
+                stack[-1][1] = True
+                if node.left:
+                    stack.append([node.left, False])
+                if node.right:
+                    stack.append([node.right, False])
+            else:
+                left = heights.get(node.left, 0)
+                right = heights.get(node.right, 0)
+                if left + right > lp:
+                    lp = left + right
+                heights[node] = max(left, right) + 1
+                stack.pop()
+        return lp   
+
+We are trying to maximize some variable so lets keep track of it as self.diameter
+At node A we care about my left child's longest path to leaf (lclp2l) and my right child's longest path to leaf (rclp2l), if I add the two then I get the diameter which is "centered" on node A
+
+The only information we still need is lclp2l and rclp2l, in recursion we return to pass information up the tree
+
+Assume we're at node V somewhere in the tree and that V is the left child of its parent node P, then by returning max(lclp2l, rclp2l) + 1 node P will know what the longest path in the tree (such that the path goes through node V and ends at a leaf) is from its left child, it will get the same information from its right child and update self.diameter in case the sum of those two lengths is larger
+
+
+
+
+def diameterOfBinaryTree(self, root: Optional[TreeNode]) -> int:
+        self.diameter = 0
+        
+        def dfs(node):
+            if not node:
+				# my parent is a leaf (and the leaf base case has diameter = 0)
+                return 0 
+				
+            # len(longest path from r.left/right to some leaf)
+            lclp2l, rclp2l = dfs(node.left), dfs(node.right) 
+            
+            # diameter including this node is # edges on left path + #E(right)
+            d = lclp2l + rclp2l
+            self.diameter = max(d, self.diameter)
+            
+            # tell my parent the length of the longest path to a leaf that goes through me
+			# this is just the maximum of the same problem but for each of my children and +1  
+			#  to include the edge from me to the longest child 
+            return max(lclp2l, rclp2l) + 1     
+         
+        dfs(root)
+        return self.diameter
+           
+ ou
+ 
+ class Solution:
+    def path_length(self, root: TreeNode):
+        if root:
+            left_path = self.path_length(root.left)
+            right_path = self.path_length(root.right)
+            path = left_path + right_path
+            if path > self.diameter:
+                self.diameter = path    
+            return max(left_path, right_path)+1
+        return 0
+        
+    def diameterOfBinaryTree(self, root: TreeNode) -> int:
+        self.diameter = 0
+        self.path_length(root)
+        return self.diameter   
+ 
+ ou
+           
+ class Solution:
+    def diameterOfBinaryTree(self, root: TreeNode) -> int:
+        def height(root):
+            nonlocal diameter
+            if not root:
+                return 0
+            
+            left = height(root.left)
+            right = height(root.right)
+            diameter = max(diameter, left + right)
+            return max(left, right) + 1
+        
+        diameter = 0
+        height(root)
+        return diameter
+
+ou
+
+Time O(N) | Space O(N):
+Time is O(N) because we must traverse through all nodes in the tree
+Space is O(N) because in the worst case we can have a skewed tree which looks like a linked list and our recursive stack can end up holding N which represents the total nodes in the skewed tree.
+
+class Solution:
+    def diameterOfBinaryTree(self, root: Optional[TreeNode]) -> int:
+        return self.findDiameter(root)[1]
+    
+    def findDiameter(self, root):
+        if not root:
+            return (0, 0)
+        
+        left = self.findDiameter(root.left)
+        right = self.findDiameter(root.right)
+        
+        currentDiameter = left[0] + right[0]
+        maxDiameter = max(left[1], right[1], currentDiameter)
+        
+        return (max(left[0], right[0]) + 1, maxDiameter)
+            
+            
