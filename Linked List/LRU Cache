@@ -1,0 +1,231 @@
+//Python
+
+//Solution 0 
+
+class LRUCache(object):
+    
+    class ListNode(object):
+        def __init__(self, k, v):
+            self.k, self.v = k, v
+            self.prev, self.next = None, None
+
+    def __init__(self, capacity):
+        """
+        :type capacity: int
+        """
+        self.capacity, self.size, self.d = capacity, 0, {}
+        self.head, self.tail = self.ListNode(0, 0), self.ListNode(0, 0)
+        self.head.next, self.tail.prev = self.tail, self.head
+    
+    def __unlink_node(self, node):
+        node.prev.next = node.next
+        node.next.prev = node.prev
+        node.prev, node.next = None, None
+    
+    def __insert_at_head(self, node):
+        node.prev, node.next = self.head, self.head.next
+        self.head.next.prev = node
+        self.head.next = node
+
+    def get(self, key):
+        """
+        :rtype: int
+        """
+        if key not in self.d:
+            return -1
+        node = self.d[key]
+        self.__unlink_node(node)
+        self.__insert_at_head(node)
+        return node.v
+        
+    def set(self, key, value):
+        """
+        :type key: int
+        :type value: int
+        :rtype: nothing
+        """
+        if key in self.d:  # hit
+            node = self.d[key]
+            node.v = value
+            self.__unlink_node(node)
+            self.__insert_at_head(node)
+        else:  # insert
+            if self.size == self.capacity:
+                least_recently_used_node = self.tail.prev
+                self.__unlink_node(least_recently_used_node)
+                del self.d[least_recently_used_node.k]
+                self.size -= 1
+            new_node = self.ListNode(key, value)
+            self.__insert_at_head(new_node)
+            self.d[key] = new_node
+            self.size += 1
+            
+ ou (moins bien pr calculer size)
+ 
+ class Node:
+    def __init__(self, key, val):
+        self.key, self.val = key, val
+        self.prev = self.next = None
+
+
+class LRUCache:
+    def __init__(self, capacity: int):
+        self.cap = capacity
+        self.cache = {}  # map key to node
+
+        self.left, self.right = Node(0, 0), Node(0, 0)
+        self.left.next, self.right.prev = self.right, self.left
+
+    # remove node from list
+    def remove(self, node):
+        prev, nxt = node.prev, node.next
+        prev.next, nxt.prev = nxt, prev
+
+    # insert node at right
+    def insert(self, node):
+        prev, nxt = self.right.prev, self.right
+        prev.next = nxt.prev = node
+        node.next, node.prev = nxt, prev
+
+    def get(self, key: int) -> int:
+        if key in self.cache:
+            self.remove(self.cache[key])
+            self.insert(self.cache[key])
+            return self.cache[key].val
+        return -1
+
+    def put(self, key: int, value: int) -> None:
+        if key in self.cache:
+            self.remove(self.cache[key])
+        self.cache[key] = Node(key, value)
+        self.insert(self.cache[key])
+
+        if len(self.cache) > self.cap:
+            # remove from the list and delete the LRU from hashmap
+            lru = self.left.next
+            self.remove(lru)
+            del self.cache[lru.key]
+
+
+//Solution 1
+
+The slow approach implementation is just simple but it is not efficient at all (and it is ugly).
+The fast approach implementation is much better using OrderedDict (so that you have O(1) access time).
+OrderedDict has .move_to_end() and .popitem(last=False) #last=True if you want to pop the last element, last=False if you want to pop the first element which make things way too easy.
+
+Why do I do this? Well, if I were interviewed, I would tell the interviewer the first approach too and then introduce the second approach for faster time. By doing so, the interviewer knows my thinking process, my knowledge on Python data structures and my communication skills.
+
+Things to keep in mind:
+
+Putting
+
+Whenever you are putting a key-value pair in, you have to check whether the key already exists.
+If it exists, you get that key-value pair, update the value and put that pair at the the end of the cache.
+If the key does not exist, you check whether the cache size is already at limit.
+If the cache size is at limit, pop the key-value pair at the beginning of the cache and push the new key-value pair at the end of the cache.
+If the cache is still under size limit, simply push the new key-value pair at the end of the cache.
+Getting
+
+Whenever you are getting the value of the key, check whether the key exists in the cache.
+If it exists, put that key-value pair at the end of the cache and return the value.
+If it does not exist, return -1.
+Slow Approach
+
+from collections import deque
+
+class LRUCache:
+
+    def __init__(self, capacity: int):
+        self.size = capacity
+        self.deque = deque()
+    
+    def _find(self, key: int) -> int:
+		""" Linearly scans the deque for a specified key. Returns -1 if it does not exist, returns the index of the deque if it exists"""
+        for i in range(len(self.deque)):
+            n = self.deque[i]
+            if n[0] == key:
+                return i 
+        return -1
+    
+    def get(self, key: int) -> int:
+        idx = self._find(key)
+        if idx == -1:
+            return -1
+        else:
+            k, v = self.deque[idx]
+            del self.deque[idx] # We have to put this pair at the end of the queue so, we have to delete it first
+            self.deque.append((k, v)) # And now, we put it at the end of the queue. So, the most viewed ones will be always at the end and be saved from popping when new capacity got hit.
+            return v
+                
+
+    def put(self, key: int, value: int) -> None:
+        idx = self._find(key)
+        if idx == -1:
+            if len(self.deque) >= self.size:
+                self.deque.popleft()
+            self.deque.append((key,value))
+        else:
+            del self.deque[idx]
+            self.deque.append((key, value))
+            
+            
+            
+            
+Runtime: 4716 ms, faster than 5.01% of Python3 online submissions for LRU Cache.
+Memory Usage: 22.9 MB, less than 6.06% of Python3 online submissions for LRU Cache.
+This is just sad.
+
+Fast Approach
+
+from collections import OrderedDict
+
+class LRUCache:
+
+    def __init__(self, capacity: int):
+        self.size = capacity
+        self.cache = OrderedDict()
+    
+    def get(self, key: int) -> int:
+        if key not in self.cache:
+            return -1
+        else:
+            self.cache.move_to_end(key)  # Gotta keep this pair fresh, move to end of OrderedDict
+            return self.cache[key]
+
+    def put(self, key: int, value: int) -> None:
+        if key not in self.cache:
+            if len(self.cache) >= self.size:
+                self.cache.popitem(last=False) # last=True, LIFO; last=False, FIFO. We want to remove in FIFO fashion. 
+        else:
+            self.cache.move_to_end(key) # Gotta keep this pair fresh, move to end of OrderedDict
+            
+		self.cache[key] = value
+Runtime: 172 ms, faster than 98.25% of Python3 online submissions for LRU Cache.
+Memory Usage: 23.1 MB, less than 6.06% of Python3 online submissions for LRU Cache.
+
+//Solution 2
+
+A hash-map, i.e. Python Dictionary solution. Time Complexity: O(1) for both get and put.
+
+Beginning with Python 3.7, Dictionary objects naturally store key-value pairs in the order of key insertion. So we can very easily identify the least recently used item with a single iteration of the dictionary keys, i.e. one can treat dictionary keys like a stack and the first key is the least-recently-used as long as we always replace accessed keys back to the top of the stack.
+
+Implementation detail of last line: To iterate the dictionary keys, I chose to use a generator object to simply generate a single key: next(iter(self.cache)), which is equivalent to list(self.cache.keys())[0] or self.cache.items()[0][0]. The reason behind doing this is because we can avoid a little bit of overhead required to generate a whole list of keys, which can be more time-consuming when capacity is large; i.e. generate one key O(1) versus a whole list of keys O(k).
+
+class LRUCache:
+
+    def __init__(self, capacity: int):
+        self.cache = {}
+        self.capacity = capacity
+        
+
+    def get(self, key: int) -> int:
+        if key in self.cache:
+            self.put(key, self.cache[key])                 # Call to put to handle LRU placement
+        return self.cache.get(key, -1)                     # Return a default of '-1' if key does not exist
+        
+
+    def put(self, key: int, value: int) -> None:           # Method adds key-value to cache and pops the LRU item
+        self.cache.pop(key, None)                          # Remove key-value if it exists
+        self.cache[key] = value                            # Insert key-value at top of key stack
+        if len(self.cache) > self.capacity:
+            del self.cache[next(iter(self.cache))]         # Delete LRU (bottom of key stack)
