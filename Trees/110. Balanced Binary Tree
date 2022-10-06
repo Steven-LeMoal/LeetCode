@@ -1,0 +1,112 @@
+//Python
+
+class Solution(object):
+    def isBalanced(self, root):
+            
+        def check(root):
+            if root is None:
+                return 0
+            left  = check(root.left)
+            right = check(root.right)
+            if left == -1 or right == -1 or abs(left - right) > 1:
+                return -1
+            return 1 + max(left, right)
+            
+        return check(root) != -1
+        
+class Solution(object):
+    def isBalanced(self, root):
+        stack, node, last, depths = [], root, None, {}
+        while stack or node:
+            if node:
+                stack.append(node)
+                node = node.left
+            else:
+                node = stack[-1]
+                if not node.right or last == node.right:
+                    node = stack.pop()
+                    left, right  = depths.get(node.left, 0), depths.get(node.right, 0)
+                    if abs(left - right) > 1: return False
+                    depths[node] = 1 + max(left, right)
+                    last = node
+                    node = None
+                else:
+                    node = node.right
+        return True
+        
+Some O times as BFS under
+        
+First define a getDepth dfs helper to quickly get the level of depth of the node.
+Then to check if the following three conditions are all satisfied:
+check if the root itself is height-balanced (by checking if the absolute difference of the levels of depth between root's left child and right child is less than 1)
+check if the root's left child is height-balanced (by recursion)
+check if the root's right child is height-balanced (by recursion)
+class Solution:
+    def isBalanced(self, root: TreeNode) -> bool:
+        def getDepth(node):
+            if not node:
+                return 0
+            return 1 + max(getDepth(node.left), getDepth(node.right))
+        
+        if not root:
+            return True
+        return abs(getDepth(root.left) - getDepth(root.right)) <= 1 and self.isBalanced(root.left) and self.isBalanced(root.right)
+        
+  BFS using deque but the algo go through value multiple time (n : max depth Sum(i=1, n)i*2^i worst times)
+        
+  class Solution:
+	def isBalanced(self, root: Optional[TreeNode]) -> bool:
+		if not root: return True
+
+		def height(root):
+			if not root: return -1
+			h , Q = 0, deque([[root]])
+			while Q:
+				level, new_level = Q.popleft(), []
+				for node in level:
+					if node.right: new_level.append(node.right)
+					if node.left : new_level.append(node.left)
+				if new_level: 
+					h += 1
+					Q.append(new_level)
+			return h
+
+		Q = deque([[root]])
+		while Q:
+			level, new_level = Q.popleft(), []
+			for node in level:
+				h_left, h_right = height(node.left), height(node.right)
+				if abs(h_left-h_right) > 1: return False
+				if node.right: new_level.append(node.right)
+				if node.left : new_level.append(node.left)
+			if new_level: 
+				Q.append(new_level)
+
+		return True
+    
+    
+    //C++ with comments
+    
+    class Solution {
+public:
+    bool isBalanced(TreeNode* root) {
+        // If the tree is empty, we can say it’s balanced...
+        if (root == NULL)  return true;
+        // Height Function will return -1, when it’s an unbalanced tree...
+		if (Height(root) == -1)  return false;
+		return true;
+	}
+    // Create a function to return the “height” of a current subtree using recursion...
+	int Height(TreeNode* root) {
+        // Base case...
+		if (root == NULL)  return 0;
+        // Height of left subtree...
+		int leftHeight = Height(root->left);
+        // Height of height subtree...
+		int rightHight = Height(root->right);
+        // In case of left subtree or right subtree unbalanced or their heights differ by more than ‘1’, return -1...
+		if (leftHeight == -1 || rightHight == -1 || abs(leftHeight - rightHight) > 1)  return -1;
+        // Otherwise, return the height of this subtree as max(leftHeight, rightHight) + 1...
+		return max(leftHeight, rightHight) + 1;
+    }
+};
