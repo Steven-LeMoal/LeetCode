@@ -1,0 +1,88 @@
+//Python
+
+class Solution:
+    def rightSideView(self, root: TreeNode) -> List[int]:
+        res, max_level = [], -1
+        
+        def traverse_tree(node, level):
+            nonlocal res, max_level
+            if not node:
+                return
+            if max_level < level:
+                res.append(node.val)
+                max_level = level
+            traverse_tree(node.right, level + 1)
+            traverse_tree(node.left, level + 1)
+        
+        traverse_tree(root, 0)
+        return res
+        
+We traverse the tree from right to left. 
+The variable max_level is used to track if we have already added the right most element for that level.
+The time complexity is O(n) and space complexity is O(1). If we consider recursion, then it is O(n) for call stack.
+
+
+The right most node isn't blocked on it's level, since this is what we'll see from the right side.
+
+Now we just need to traverse the tree in the right order.
+
+We will go about it with DFS, we will keep track of the levels and append the left childs first, then the right childs.
+
+This way, if there is a right child, it will override the left child (block it, so the left isn't seen anymore)
+
+We will hold a dictionary that will save the nodes that we see on every level, and then we will return the values of the dictionary (since we don't care about the node level)
+
+Code
+from collections import deque
+
+class Solution:
+    def rightSideView(self, root: Optional[TreeNode]) -> List[int]:
+        if not root: return []
+        
+        # Queue has (node, level) elements
+        bfs_queue = deque([(root, 1)])
+        
+        # result has the rightmost element in each level
+        answer_dict = {}
+        
+        while bfs_queue:
+            node, level = bfs_queue.popleft()
+            answer_dict[level] = node.val
+            if node.left:
+                bfs_queue.append((node.left, level + 1))
+            if node.right:
+                bfs_queue.append((node.right, level + 1))
+        
+        return answer_dict.values()
+Complexity Analysis
+Time - O(n). We do a single traversal of the tree
+Space - O(n). We have a queue for the BFS
+In order traversal
+We can achieve the same thing with in-order traversal, because the right-most element on every level is visited last.
+
+I add the example for demonstration and learning purposes :)
+
+This time we use an array directly, and the index is the level-1 value.
+
+class Solution:
+    def rightSideView(self, root: Optional[TreeNode]) -> List[int]:
+        if not root: return []
+        
+        answer = []
+        self.in_order_traversal(root, 1, answer)
+        return answer
+    
+    def in_order_traversal(self, root, level, answer):
+        if not root: return
+        
+        self.in_order_traversal(root.left, level + 1, answer)
+        
+        # If it's the first time on this level, let's increase our array to match.
+        while len(answer) < level:
+			# we don't care about the value we append, it will be over written anyway.
+            answer.append(0)
+        
+        answer[level-1] = root.val
+        self.in_order_traversal(root.right, level + 1, answer)
+        
+        
