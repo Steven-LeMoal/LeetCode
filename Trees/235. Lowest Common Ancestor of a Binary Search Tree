@@ -1,0 +1,77 @@
+//Python
+
+Method 1: O(n)
+We can search through the tree
+
+1) If the value p or q exist the left/right subtree
+	-  return the node
+2) Until a node have both left and right nodes return, it is the LCA of p and q.
+   Else, either left or right node is the LCA
+def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+		def find_lca(root, p, q):
+			if root in [p, q, None]:
+				return root
+
+			left = find_lca(root.left, p, q)
+			right = find_lca(root.right, p, q)
+
+			if left is not None and right is not None: 
+				return root
+			elif left is not None: 
+				return left
+			else:
+				return right
+
+		if p.val == q.val:
+			return root
+
+		return find_lca(root, p, q)
+Time Complexity: O(n)
+Space Complexity: O(n)
+
+
+Method 2: O(h) where h is the height of the tree
+First, we could set 3 condition to find out which subtree(s) do p and q place.
+
+Let min_val be min(p.val, q.val)
+and max_val be max(p.val, q.val)
+
+1) min_val <= node.val <= max_val
+	- It means min_val is inside the left subtree and max_val is inside the right subtree
+	  -> The LCA is the node
+	  
+2) min_val < max_val < node.val
+	- It means min_val and max_val are inside the left subtree
+	  -> The LCA is inside the left subtree
+	  
+3) node.val  > max_val  > min_val
+	- It means min_val and max_val are inside the right subtree
+	  -> The LCA is inside the right subtree
+def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+	if p.val < q.val:
+		min_val = p.val
+		max_val = q.val
+	else:
+		min_val = q.val
+		max_val = p.val
+
+	while True:
+		if min_val <= root.val <= max_val:
+			return root
+		elif max_val < root.val:
+			root = root.left
+		else:
+			root = root.right
+
+
+class Solution:
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        if p.val > root.val and q.val > root.val:
+            return self.lowestCommonAncestor(root.right, p, q)
+        elif p.val < root.val and q.val < root.val:
+            return self.lowestCommonAncestor(root.left, p, q)
+        else:
+            return root
+
+Time Complexity: O(h) where h is the height of the tree
+Space Complexity: O(1)
