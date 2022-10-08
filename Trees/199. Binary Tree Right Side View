@@ -21,6 +21,24 @@ We traverse the tree from right to left.
 The variable max_level is used to track if we have already added the right most element for that level.
 The time complexity is O(n) and space complexity is O(1). If we consider recursion, then it is O(n) for call stack.
 
+class Solution:
+    def rightSideView(self, root: TreeNode) -> List[int]:
+        res = []
+        q = collections.deque([root])
+
+        while q:
+            rightSide = None
+            qLen = len(q)
+
+            for i in range(qLen):
+                node = q.popleft()
+                if node:
+                    rightSide = node
+                    q.append(node.left)
+                    q.append(node.right)
+            if rightSide:
+                res.append(rightSide.val)
+        return res
 
 The right most node isn't blocked on it's level, since this is what we'll see from the right side.
 
