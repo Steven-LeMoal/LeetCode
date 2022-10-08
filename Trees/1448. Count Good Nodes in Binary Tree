@@ -1,0 +1,91 @@
+//Python
+
+DFS through every path, and keep tracking of biggest value(curMax) in the path.
+If current node is >= the biggest value in the path, we add the answer by one.
+Here's an example to show how the code works:
+
+class Solution:
+    def goodNodes(self, root: TreeNode) -> int:
+        if not root:
+            return 0
+        
+        def dfs(node, curMax):
+            if not node:
+                return
+            if node.val >= curMax:
+                count[0] += 1
+                curMax = node.val
+            dfs(node.left, curMax)
+            dfs(node.right, curMax)
+        
+        count = [0]
+        dfs(root, root.val)
+        
+        return count[0]
+        
+class Solution:
+    def goodNodes(self, root: TreeNode) -> int:
+	
+        ans = 0
+        q = deque()
+		
+        q.append((root,-inf))
+        '''perform bfs  with track of maxval till perant node'''	
+
+        while q:
+            node,maxval = q.popleft()
+			 '''if curr node has max or eqvalue till current max'''
+            if node.val >= maxval:  
+                ans += 1
+				
+            if node.left:    #new max update
+                q.append((node.left,max(maxval,node.val)))
+            
+            if node.right:
+                q.append((node.right,max(maxval,node.val)))
+                
+                
+                
+# Time complexity: O(N) as we visit every node only once.
+# Space complexity: O(H) where H is the height of the tree.
+# In the worst case, H would be N given that the tree only has one path.
+class Solution:
+    # the idea is to record the max value from the root to the node
+    # we can first initialise mx as -10000 
+    def goodNodes(self, root: TreeNode, mx = -10000) -> int:
+        # if the root is null, we return 0
+        if root is None: return 0
+        return (
+            # then we can break it into 3 parts
+            # the first part is the current node
+            # if the current node value is greater than the maximum value so far
+            # that means the current node is a good node
+            # hence we add 1, else add 0
+            (1 if mx <= root.val else 0) + 
+            # the second part is the result of the left sub-tree
+            # we traverse it with the updated maximum value at the current point
+            # we don't need to check if root.left is null or not here
+            # as we cover the null case in the first line
+            self.goodNodes(root.left, max(root.val, mx)) +
+            # the last part is the result of the right sub-tree
+            # we traverse it with the updated maximum value at the current point
+            # we don't need to check if root.right is null or not here
+            # as we cover the null case in the first line
+            self.goodNodes(root.right, max(root.val, mx))
+        )
+                
+        return ans
+        
+class Solution:
+    def goodNodes(self, root: TreeNode) -> int:
+        def dfs(node, maxVal):
+            if not node:
+                return 0
+
+            res = 1 if node.val >= maxVal else 0
+            maxVal = max(maxVal, node.val)
+            res += dfs(node.left, maxVal)
+            res += dfs(node.right, maxVal)
+            return res
+
+        return dfs(root, root.val)
