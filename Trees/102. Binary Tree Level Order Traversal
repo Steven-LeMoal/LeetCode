@@ -1,0 +1,107 @@
+//Python
+
+Better Solution - BFS vs DFS?
+👉 Choose DFS if you know that the trees would generally be more balanced (full tree or complete tree or close). 
+This would give worst case space complexity of O(h) in case of DFS instead of O(2^h) in case of BFS, where h (=O(logn)) is the height of tree.
+
+👉 Choose BFS if you know that tree are skewed and there might be some branches that go deep. 
+This would give space complexity of W (W = max width / nodes on a level ) in case of BFS instead of O(n) in case of DFS.
+
+Neither will be always better over the other. Here, since the question specifically asks for level order traversal,
+I think the first solution is more intuitive and applicable in this case.
+
+from collections import deque
+
+class Solution:
+    def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
+        if root is None: return []
+        
+        pre  = []
+        queu = deque([(root)])
+        
+        while(queu):
+            level = []
+            
+            for _ in range(len(queu)):
+                s = queu.popleft()
+                level.append(s.val)
+                
+                if s.left:
+                    queu.append(s.left)
+                if s.right:
+                    queu.append(s.right)
+                    
+            pre.append(level)
+            
+        return pre
+        
+# DFS recursively
+def levelOrder1(self, root):
+    res = []
+    self.dfs(root, 0, res)
+    return res
+    
+def dfs(self, root, level, res):
+    if not root:
+        return 
+    if len(res) < level+1:
+        res.append([])
+    res[level].append(root.val)
+    self.dfs(root.left, level+1, res)
+    self.dfs(root.right, level+1, res)
+ 
+# DFS + stack I   
+def levelOrder2(self, root):
+    if not root:
+        return []
+    res, stack = [], [(root, 0)]
+    while stack:
+        curr, level = stack.pop()
+        if len(res) < level + 1:
+            res.append([])
+        res[level].append(curr.val)
+        if curr.right:
+            stack.append((curr.right, level+1))
+        if curr.left:
+            stack.append((curr.left, level+1))
+    return res
+
+# DFS + stack II  
+def levelOrder3(self, root):
+    res, stack = [], [(root, 0)]
+    while stack:
+        curr, level = stack.pop()
+        if curr:
+            if len(res) < level + 1:
+                res.append([])
+            res[level].append(curr.val)
+            stack.append((curr.right, level+1))
+            stack.append((curr.left, level+1))
+    return res
+
+# BFS + queue
+def levelOrder4(self, root):
+    res, queue = [], [(root, 0)]
+    while queue:
+        curr, level = queue.pop(0)
+        if curr:
+            if len(res) < level+1:
+                res.append([])
+            res[level].append(curr.val)
+            queue.append((curr.left, level+1))
+            queue.append((curr.right, level+1))
+    return res
+    
+# BFS + deque
+def levelOrder(self, root):
+    from collections import deque
+    res, queue = [], deque([(root, 0)])
+    while queue:
+        curr, level = queue.popleft()
+        if curr:
+            if len(res) < level+1:
+                res.append([])
+            res[level].append(curr.val)
+            queue.append((curr.left, level+1))
+            queue.append((curr.right, level+1))
+    return res
