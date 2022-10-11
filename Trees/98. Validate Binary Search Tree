@@ -1,0 +1,130 @@
+//Python
+
+Method: recursion
+
+def isValidBST(self, root: Optional[TreeNode]) -> bool:
+	def check_validate(root, lower, upper):
+		if not root:
+			return True
+		if lower >= root.val or upper <= root.val:
+			return False
+		else:
+			return check_validate(root.left, lower, root.val) and check_validate(
+				root.right, root.val, upper
+			)
+
+	return check_validate(root, -math.inf, math.inf)
+Time Complexity: O(n)
+Space Complexity: O(n)
+
+
+Using in-order, much more easy-understanding
+
+last = -math.inf
+ended = False
+def isValidBST(self, root: Optional[TreeNode]) -> bool:
+	def check_validate(cur):
+		if self.ended:
+			return 
+		if cur.left:
+			check_validate(cur.left)
+
+		if not(cur.val > self.last):
+			self.ended = True
+			return
+
+		self.last = cur.val
+		if cur.right:
+			check_validate(cur.right)
+	check_validate(root)
+	return not self.ended
+Time Complexity: O(n)
+Space Complexity: O(n)
+
+
+n = number of nodes
+RunTime = O(n) - (since there are several operations that happen per node)
+Space = O(logN) - (Looking at the depth of the call stack is proportional to the depth of the tree which is Log(n) / Log(2) )
+
+A recursive version of the in-order traversal solution, one pass:
+
+def isValidBST(self, root):
+    res, self.flag = [], True
+    self.helper(root, res)
+    return self.flag
+    
+def helper(self, root, res):
+    if root:
+        self.helper(root.left, res)
+        if res and root.val <= res[-1]:
+            self.flag = False
+            return
+        res.append(root.val)
+        self.helper(root.right, res)
+A shorter recursive solution:
+
+def isValidBST(self, root):
+    return self.helper(root, float("-inf"), float("inf"))
+    
+def helper(self, root, low, high):
+    if not root:
+        return True
+    if not root.left and not root.right:
+        return low < root.val < high
+    return low < root.val < high and self.helper(root.left, low, root.val) and self.helper(root.right, root.val, high)
+
+
+class Solution(object):
+    def isValidBST(self, root):
+        return self.valid(root, -sys.maxsize, sys.maxsize)
+    
+    def valid(self, root, l, r):
+        if not root:
+            return True
+        if not (l < root.val < r):
+            return False
+        return self.valid(root.left, l, root.val) and self.valid(root.right, root.val, r)
+        
+    def isValidBST3(self, root):
+        pre, stack = None, []
+        while True:
+            while root:
+                stack.append(root)
+                root = root.left
+            if not stack:
+                return True
+            node = stack.pop()
+            if pre and pre.val >= node.val:
+                return False
+            pre = node
+            root = node.right
+        
+    def isValidBST2(self, root):
+        ret, stack = [], []
+        while True:
+            while root:
+                stack.append(root)
+                root = root.left
+            if not stack:
+                break
+            node = stack.pop()
+            ret.append(node.val)
+            root = node.right
+        for i in range(len(ret)-1):
+            if ret[i] >= ret[i+1]:
+                return False
+        return True
+                
+    def isValidBST1(self, root):
+        ret = []
+        self.dfs(root, ret)
+        for i in range(len(ret)-1):
+            if ret[i] >= ret[i+1]:
+                return False
+        return True
+             
+    def dfs(self, root, ret):
+        if root:
+            self.dfs(root.left, ret)
+            ret.append(root.val)
+            self.dfs(root.right, ret)
