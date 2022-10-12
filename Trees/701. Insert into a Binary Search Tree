@@ -1,0 +1,68 @@
+//Python
+
+Approach Explain :
+
+Summary :
+If the root is empty, the new tree node can be returned as the root node.
+
+Otherwise compare root. val is related to the size of the target value:
+
+If root.val is greater than the target value, indicating that the target value should be inserted into the left subtree of the root, and the problem becomes root. Insert the target value in the left and recursively call the current function;
+If root.val is less than the target value, indicating that the target value should be inserted into the right subtree of the root, and the problem becomes root. Insert the target value in right and recursively call the current function.
+Explanation:
+In Binary search tree follow the property, all the nodes on right subtree, value is greater then the root value & all the nodes on left subtree, value is less then the root value.
+
+
+So, now let's say we need to add 5. We will first compare with the root node. If it is less then we go on to the left subtree, if it is greater then we go to the right subtree. So, in this example right subtree exist and we will compare with 7. Then it will go to the left & left subtree doesn't exist over here, then we will add the new node over here.
+Now let's say we need to add 8, then we will go again the right step and here we will add 8
+
+class Solution:
+    def insertIntoBST(self, root: Optional[TreeNode], val: int) -> Optional[TreeNode]:
+        if root is None: return TreeNode(val) 
+        if root.val > val:  root.left = self.insertIntoBST(root.left, val)
+        else: root.right = self.insertIntoBST(root.right, val)
+        return root
+ANALYSIS :-
+
+Time Complexity :- BigO(N)
+
+Space Complexity :- BigO(H) as considering recursion stack, takes place in internal memory, if not consider then O(1)
+
+iterative
+
+There are 3 facts to BST :
+
+Inorder Traversal of BST is a sorted sequence.
+In a BST,
+all the values smaller then root, exists in the left subtree.
+all the values greater then root, exists in the right subtree.
+and this is recursively true for every node.
+A new key is always inserted at the leaf.
+In order to find the position to insert a value, we need to check the condition-2 at every node while traversing : ( and update the links while inserting )
+
+TC : O(n) -> Typical dfs
+SC : O(n) -> Stack Space ( in the worst case, the tree could be pathological tree )
+
+class Solution:
+    def insertIntoBST(self, root: Optional[TreeNode], val: int) -> Optional[TreeNode]:
+        if(root is None): return TreeNode(val)
+        
+        curr = root;
+        
+        while(True):
+            if curr.val < val:
+                if not curr.right: 
+                    curr.right = TreeNode(val)
+                    break
+                curr = curr.right
+
+            else:
+                if not curr.left: 
+                    curr.left = TreeNode(val)
+                    break
+                curr = curr.left
+
+        return root
+        
+        
+        
