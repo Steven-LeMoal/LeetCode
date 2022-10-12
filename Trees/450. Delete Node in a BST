@@ -1,0 +1,184 @@
+//Python
+
+Key Learnings for me:
+
+First find the node that we need to delete.
+After it's found, think about ways to keep the tree BST after deleting the node.
+If there's no left or right subtree, we found the leaf. Delete this node without any further traversing.
+If it's not a leaf node, what node we can use from the subtree that can replace the delete node and still maintain the BST property? 
+We can either replace the delete node with the minimum from the right subtree (if right exists)
+or we can replace the delete node with the maximum from the left subtree (if left exists).
+
+def deleteNode(self, root: TreeNode, key: int) -> TreeNode:
+	if not root:
+		return None
+
+	if key > root.val:
+		root.right = self.deleteNode(root.right, key)
+	elif key < root.val:
+		root.left = self.deleteNode(root.left, key)
+	else:
+		if not root.left and not root.right:
+			root = None
+		elif root.right:
+			root.val = self.successor(root)
+			root.right = self.deleteNode(root.right, root.val)
+		else:
+			root.val = self.predecessor(root)
+			root.left = self.deleteNode(root.left, root.val)
+	return root
+
+def successor(self, root: TreeNode) -> TreeNode:
+	root = root.right
+	while root.left:
+		root = root.left
+	return root.val
+
+def predecessor(self, root: TreeNode) -> TreeNode:
+	root = root.left
+	while root.right:
+		root = root.right
+	return root.val
+  
+  
+  
+  
+  There are five possible scenarios if the tree is not empty:
+1.We can't find such a node that has a value of key -> return root
+If we find the node, then we need to delete it ( let's call it node for now) and rearrange its subtree:
+2. If both of its left and right child nodes are empty -> return None
+3. If its left child node is empty and its right child is not -> use its right child node as the root of this new subtree -> return node.right
+4. If its left child node is not empty and its right child is empty -> use its left child node as the root of this new subtree -> return node.left
+5. If both of its left and right child nodes are not empty. The case is a little bit more complecated. Let me explain it:
+From the definition of Binary Search Tree, we know that a root node's value is larger than any nodes on its left subtree and smaller than any nodes on its right subtree. Also, a root node's left child root.left is the largest of the root's left subtree, and it is smaller than the smallest node of the root's right subtree. The node with the smallest value on the right subtree is its leftmost leaf node.
+Therefore, we should find the leftmost leaf node of the right subtree of the root (call it cur), and move the left subtree to be the left subtree of this node -> cur.left = root.left. Finally to delete the node, we return its right child node node.right.
+
+Here's my code.
+Iterative
+
+class Solution:
+	#  remove the root of a tree
+    def deleteCur(self, root):
+	    # if it has no child nodes
+        if not (root.right or root.left):
+            return None
+		# if it only has left child
+        elif root.left and not root.right:
+            return root.left
+		# if it only has right child
+        elif not root.left and root.right:
+            return root.right
+		# if it has both child nodes
+        else:
+            newRoot = cur = root.right
+            while cur.left:
+                cur = cur.left
+			# move the left subtree to be the left child of 
+			# the leftmost leaf node of the right subtree
+            cur.left = root.left
+            return newRoot
+			
+    def deleteNode(self, root: Optional[TreeNode], key: int) -> Optional[TreeNode]:
+        if not root:
+            return root
+        elif root.val == key:
+            return self.deleteCur(root)
+		
+		# need two pointers to find 
+		# the node to be deleted and its parent node.
+        cur, prev = root, None
+        while cur:
+            if cur.val > key:
+                prev = cur
+                cur = cur.left
+            elif cur.val < key:
+                prev = cur
+                cur = cur.right
+            else:
+                if prev.val > cur.val:
+                    prev.left = self.deleteCur(cur)
+                    break
+                else:
+                    prev.right = self.deleteCur(cur)
+                    break
+        return root
+Recursive:
+
+class Solution:
+    def deleteNode(self, root: Optional[TreeNode], key: int) -> Optional[TreeNode]:
+        if not root:
+            return root
+        
+        if root.val == key:
+            if not (root.right or root.left):
+                del root
+                return None
+            
+            elif root.left and not root.right:
+                return root.left
+            
+            elif not root.left and root.right:
+                return root.right
+           
+            else:
+                NewRoot = cur = root.right
+                while cur.left:
+                    cur = cur.left
+                cur.left = root.left
+                
+                return NewRoot
+            
+        if root.val > key: 
+            root.left = self.deleteNode(root.left,key)  # Recursion on left subtree
+        if root.val < key: 
+            root.right = self.deleteNode(root.right,key)  # Recursion on right subtree
+        return root
+  
+  
+  
+  
+  
+  ///Not good :
+  
+  Return left child instead of root, a.k.a delete root
+      return root.left
+The seems to me messing up the tree. Also, BST is not necessarily balanced, should be O(log(h)) instead of O(log(n)).
+  
+  Idea:
+
+When found the node, put right child of the node to the right of the right most leaf node of left child. That way the values are still in order.
+Return the left child of the node(skip root, a.k.a delete it). If the node doesn't have left child, return right child.
+Otherwise do binary search. If key < root.val, change left child to the returned new root. Do right child if key > root.val.
+This solution always runs in O(log(n)) time since when it finds the node to delete, it goes to the right most leaf of the left sub-tree to put right sub-tree of the node there.
+
+class Solution(object):
+    def deleteNode(self, root, key):
+        """
+        :type root: TreeNode
+        :type key: int
+        :rtype: TreeNode
+        """
+        if not root: return None
+        
+        if root.val == key:
+            if root.left:
+                # Find the right most leaf of the left sub-tree
+                left_right_most = root.left
+                while left_right_most.right:
+                    left_right_most = left_right_most.right
+                # Attach right child to the right of that leaf
+                left_right_most.right = root.right
+                # Return left child instead of root, a.k.a delete root
+                return root.left
+            else:
+                return root.right
+        # If left or right child got deleted, the returned root is the child of the deleted node.
+        elif root.val > key:
+            root.left = self.deleteNode(root.left, key)
+        else:
+            root.right = self.deleteNode(root.right, key)
+            
+        return root
+        
+        
+    
