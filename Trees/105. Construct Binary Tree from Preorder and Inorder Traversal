@@ -1,0 +1,137 @@
+//Python
+
+I'm going to assume you know the basics of how to answer the question, the answer is more pertained to coming up with an optimised solution.
+
+First Solution
+T: O(N^2) where N is the number if items in either the preorder or inorder list (they both have to be the same).
+
+Let's start with the basic recursive approach:
+
+    def buildTree(self, preorder: List[int], inorder: List[int]) -> TreeNode:
+        preorder.reverse()
+        return self.buildTreeRec(preorder, inorder)
+    def buildTreeRec(self, preorder, inorder):
+        if not inorder: return None
+        n = TreeNode(preorder.pop())
+        i = inorder.index(n.val)
+        n.left = self.buildTreeRec(preorder, inorder[:i])
+        n.right = self.buildTreeRec(preorder, inorder[i+1:])
+        return n
+This approach looks great and is accepted by Leetcode, but there is one great flaw with the time complexity and that is the third line in the recursive function. In Python at least, the .index function runs in N time. It will run across the entire list (array) looking for n.val. Why is this bad?
+
+Let's say we have a SUPER unbalanced tree. Like it basically looks like a linear, y = x function where every node has no right children but just a left child. Let's say it has just four nodes: A -> B -> C -> D
+
+It's preorder traversal is going to be: [A, B, C, D]
+It's inorder traversal is going to be: [D, C, B, A]
+
+So let's take the very first iteration of the recursive function. The root of the tree (and the answer itself) is going to be A. Simple enough, we pop the value from our preorder list (pop from the right since the list has been reversed). Now we have to find it in our inorder list, in order to know which values belong in A's left and right subtree. In the current approach, that means we run across the full inorder traversal list which is N nodes.
+
+In the second iteration of the recursive function, we'll have to run across N-1 nodes since we slice off the A. So for N nodes, we'll have to run across N, then N - 1, then N-2, then N-3 etc. items in the inorder list.
+
+As we all know, that's an N^2 approach. So we have to do better. The most obvious solution is to remove the .index and that idea forms the basis for the second solution.
+
+Second Solution
+
+The second solution uses a dictionary to store all of the values of the inorder list. Each key-value pair is the list item's value and its index. So basically, inorderList[i] : i.
+
+The immediate issue with this is that we can longer slice the inorderDict like we were slicing the inorder list like in the first solution. So we have to maintain two pointers, beginning and end which represents the current subsection of the inorder list on which we are currently working.
+
+Here's the code first, and I'll try to walk through an example:
+
+	def buildTree(self, preorder: List[int], inorder: List[int]) -> TreeNode:
+        preorder.reverse()
+        inorderDict = { v:i for i,v in enumerate(inorder) }
+        return self.buildTreeHelper(preorder, inorderDict, 0, len(preorder) - 1)
+    def buildTreeHelper(self, preorder, inorderDict, beg, end):
+        if beg > end: return None
+        root = TreeNode(preorder.pop())
+        index = inorderDict[root.val]
+        
+        root.left = self.buildTreeHelper(preorder, inorderDict, beg, index - 1)
+        root.right = self.buildTreeHelper(preorder, inorderDict, index + 1, end)
+        return root
+So in the first function, we still reverse the preorder list and make a dictionary for the inorder list. If that syntax looks confusing to you, google 'dictionary comprehensions' and the Python built-in 'enumerate()' function.
+
+The beg and end act as bounds for the recursion. If end ever crosses beg, that means we have no nodes left. It's the equivalent in the first solution of having an empty inorder list.
+
+Let's use the example from the question itself:
+
+preorder = [3,9,20,15,7]
+inorder = [9,3,15,20,7]
+
+So in the first iteration of the recursive approach, we build the root node which is 3. Beg and end are 0 and 4 respectively. The root's left subtree is composed of all nodes to the left of 3 in the inorder list. So just the 9.
+
+When going to the left, we only update the end value. That new value will be the index of 3 in the inorder list, less 1. This is equivalent to slicing the inorder list as so: list[:i].
+
+In the second iteration of the recursive function, we're building the leftsubtree for the original root 3. It's pretty trivial since it's just one node, 9. The beg and end values here will be 0 and 0 respectively. We build the node and pop the 9 from the preorder list. We still make the calls to try to make 9's left and right subtree. However, we know that they don't exist. When we call the recursive function in both instances, both will return None.
+
+For 9's left subtree, the beg and end values are 0 and -1, and for the right subtree, the beg and end values are 1 and 0. Both will cause the first if statement to be true, thus retuning None.
+
+Going back to the root 3, the same logic applies for the root's right subtree. Only difference is, when going right, only update the beg.
+
+python
+
+
+
+class Solution:
+    def buildTree(self, preorder: List[int], inorder: List[int]) -> Optional[TreeNode]:
+        if not preorder or not inorder:
+            return None
+
+        root = TreeNode(preorder[0])
+        mid = inorder.index(preorder[0])
+        root.left = self.buildTree(preorder[1 : mid + 1], inorder[:mid])
+        root.right = self.buildTree(preorder[mid + 1 :], inorder[mid + 1 :])
+        return root
+        
+        
+class Solution:
+    def buildTree(self, preorder: List[int], inorder: List[int]) -> TreeNode:
+
+        def array_to_tree(left, right):
+            nonlocal preorder_index
+            # if there are no elements to construct the tree
+            if left > right: return None
+
+            # select the preorder_index element as the root and increment it
+            root_value = preorder[preorder_index]
+            root = TreeNode(root_value)
+
+
+            preorder_index += 1
+
+            # build left and right subtree
+            # excluding inorder_index_map[root_value] element because it's the root
+            root.left = array_to_tree(left, inorder_index_map[root_value] - 1)
+            root.right = array_to_tree(inorder_index_map[root_value] + 1, right)
+
+            return root
+
+        preorder_index = 0
+
+        # build a hashmap to store value -> its index relations
+        inorder_index_map = {}
+        for index, value in enumerate(inorder):
+            inorder_index_map[value] = index
+
+        return array_to_tree(0, len(preorder) - 1)
+        
+        
+        
+ Complexity analysis
+
+Let NN be the length of the input arrays.
+
+Time complexity : O(N).
+
+Building the hashmap takes O(N) time, as there are N nodes to add, and adding items to a hashmap has a cost of O(1), so we get N . O(1) = O(N).
+
+Building the tree also takes O(N) time. The recursive helper method has a cost of O(1) for each call (it has no loops), and it is called once for each of the NN nodes, giving a total of O(N)O(N).
+
+Taking both into consideration, the time complexity is O(N).
+
+Space complexity : O(N).
+
+Building the hashmap and storing the entire tree each requires O(N) memory. 
+The size of the implicit system stack used by recursion calls depends on the height of the tree, which is O(N)
+in the worst case and O(logN) on average. Taking both into consideration, the space complexity is O(N).
