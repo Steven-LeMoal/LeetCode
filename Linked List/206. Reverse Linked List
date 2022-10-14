@@ -71,7 +71,27 @@ if __name__ == "__main__":
     Result = solution.reverseList(head)
 
     print(Result.val, Result.next.val, Result.next.next.val, Result.next.next.next.val, Result.next.next.next.next.val)```
+
+//v5
+
+class Solution:
+    def flipMapping(self, curr, nex):
+        if nex.next:
+            self.flipMapping(curr.next, nex.next)
+        else:
+            self.new_head = nex
         
+        nex.next = curr
+    
+    def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        if not head or not head.next:
+            return head
+        
+        self.new_head = None   
+        self.flipMapping(head, head.next)   
+        head.next = None   
+        return(self.new_head)
+	
 //Java
 
 /**
