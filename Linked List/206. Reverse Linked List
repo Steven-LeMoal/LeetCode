@@ -1,4 +1,8 @@
 //Python
+
+tterative approach takes O(1); as we dont store any aux space.
+recursive approach takes roughly O(n); as we'll be storing all the nodes (roughly) in the call stack.
+
 //v1
 # Definition for singly-linked list.
 # class ListNode:
