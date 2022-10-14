@@ -42,6 +42,7 @@ class Solution:
         # Set each copy's .random
         node = head
         while node:
+            #random of original and the random of the copy (random.next is the copy of random)
             node.next.random = node.random and node.random.next
             node = node.next.next
 
