@@ -62,44 +62,157 @@ pre, cur : used in reversing, standard reverse linked linked list method
 
 jump : used to connect last node in previous k-group to first node in following k-group
 
-def reverseKGroup(self, head, k):
-    dummy = jump = ListNode(0)
-    dummy.next = l = r = head
-    
-    while True:
-        count = 0
-        while r and count < k:   # use r to locate the range
-            r = r.next
-            count += 1
-        if count == k:  # if size k satisfied, reverse the inner linked list
-            pre, cur = r, l
-            for _ in range(k):
-                cur.next, cur, pre = pre, cur.next, cur  # standard reversing
-            jump.next, jump, l = pre, l, r  # connect two k-groups
-        else:
-            return dummy.next
+class Solution:
+    def reverseKGroup(self, head, k):
+        dummy = jump = ListNode(0)
+        dummy.next = l = r = head
+
+        while True:
+            count = 0
+            while r and count < k:   # use r to locate the range
+                r = r.next
+                count += 1
+            if count == k:  # if size k satisfied, reverse the inner linked list
+                
+                cur = l#l : head of the k sub linked list (of head)
+                pre = r#r : Node after the tail of the k sub linked list (in head linked list)
+                
+                for _ in range(k):
+                    cur.next, cur, pre = pre, cur.next, cur  # standard reversing
+ 
+                # connect two k-groups
+                jump.next = pre #pre : head of the reverse linked list
+                jump = l#l : head of the k sub linked list (of head) since l = head at start
+                        #  = tail of the reverse linked list for jump linked list (because of : jump.next = pre)
+                        # also because jump = ListNode(0) not jump = head
+                l = r#r : Node after tail of the k sub linked list (in head linked list) since r = head at start
+                
+            else:
+                return dummy.next
             
             
 The basic idea is rearranging the nodes in a new list. I use p to iterate through the original list, while putting all the nodes behind a new starting node r, and e is used to store the end of the previous group, where new nodes of the next group will be inserted.
 
-def reverseKGroup(self, head: ListNode, k: int) -> ListNode:
-    p = head
-    e = r = ListNode(None)
+class Solution:
+    def reverseKGroup(self, head: ListNode, k: int) -> ListNode:
+        p = head
+        e = r = ListNode(None)
 
-	# find out the length of the list
-    n = 0
-    while head:
-        head = head.next
-        n += 1
+        # find out the length of the list
+        n = 0
+        while head:
+            head = head.next
+            n += 1
 
-	# rearrange the nodes
-    for i in range(n // k):    # for every group
-        s = p                  # record the first node of a group that will soon become the last node of the reversed group
-        for _ in range(k):     # for every node in a group
-            t = p.next
-            p.next = e.next    # put the current node right before the head of the reversed group
-            e.next = p         # register p as the head of the reversed group
-            p = t              # visit the next node in the original list
-        e = s                  # update the end of the reversed group
-    e.next = p                 # append the tail to the end
-    return r.next
+        # rearrange the nodes
+
+        #dans le for qui suit on parcours la linked list normal avec p et on modifie la linked list 
+        
+        for i in range(n // k):    # for every group
+            s = p                  # record the first node of a group that will soon become the last node of the reversed group
+            for _ in range(k):     # for every node in a group
+                t = p.next
+            #on utilise e.next au lieu de e ou prev car dans la suite du code on veut que e.next = p or on a mis e = s 
+            #sa fonctionnerai pas 
+                if(e.next) : print(e.next.val)
+                else: print("e.next null")#e.next est bien nul à la fin/debut de chaque kth reverse group
+                p.next = e.next    # put the current node right before the head of the reversed group
+                e.next = p         # register p as the head of the reversed group since we do 1<-2<-3 not 3->2->1
+                p = t              # visit the next node in the original list
+            print("Stop", e.val)
+            e = s                  # e : end of the reversed group
+            print(e.val)
+        e.next = p                 # append the tail to the end
+        return r.next
+    
+    
+      
+This problem can be split into several steps:
+
+Since we need to reverse the linked-list every k nodes, we need to check whether the number of list nodes are enough to reverse. Otherwise, there is no need to reverse.
+
+If we need to reverse the k nodes, how to do that? Following is my idea:
+
+If the structure of the linkedlist is like this:
+
+ 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
+Then there will always be a pointer, which points to the node AHEAD of the first node to reverse. The pointer will help to link the linkedlist after.
+
+At first, we will add a dummy node in front of the linked list to act as the first pointer. After we add the pointer, the linked list will look like this:
+
+    0 (pointer) -> 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
+Suppose that there are enough nodes to be reversed, we just use the "reverse linked list" trick to reverse the k nodes. Please refer to "https://leetcode.com/problems/reverse-linked-list/" if you don't know how to reverse a linked list.
+
+if k = 3, we can reverse 1 to 3 first using the following code:
+
+  ListNode prev = null, curr = pointer.next, next = null;
+  for (int i = 0; i < k; i++) {
+		next = curr.next;
+		curr.next = prev;
+		prev = curr;
+		curr = next;
+  }
+This is the illustartion of the first 3 steps:
+
+    step1: 0 (pointer) -> 1      2 -> 3 -> 4 -> 5 -> 6 -> 7
+	step2: 0 (pointer) -> 1 <- 2      3 -> 4 -> 5 -> 6 -> 7
+	step3: 0 (pointer) -> 1 <- 2 <- 3      4 -> 5 -> 6 -> 7
+This is an easy and general algorithm to reverse a linked list. However, if you are careful enough, you will find that after the for-loop, the link from 3 to 4 will be cut (as shown in step3).
+
+Now we need to reconstruct the linked list and fix the issue. You will figure out that at step3, the 3 is the prev node, 4 is the curr node.
+
+	step3: 0 (pointer) -> 1 <- 2 <- 3 (prev)    4 (curr) -> 5 -> 6 -> 7
+We can fix the sequence based on the following codes. The basic idea is to link the pointer to 3 and link 1 to 4:
+
+	ListNode tail = pointer.next;
+	tail.next = curr; 
+	pointer.next = prev;
+	pointer = tail;
+Then the result is:
+
+	after first line:   0 (pointer) -> 1 (tail) <- 2 <- 3 (prev)    4 (curr) -> 5 -> 6 -> 7
+	after second line:  0 (pointer) -> 1 (tail) <- 2 <- 3 (prev)    4 (curr) -> 5 -> 6 -> 7
+					    |____________________________↑
+	after third line:   
+							|-----------------------↓
+						0 (pointer)    1 (tail) <- 2 <- 3 (prev)    4 (curr) -> 5 -> 6 -> 7
+							       |____________________________↑
+									   
+	after forth line:	0 -> 3 -> 2 -> 1 (pointer) -> 4 -> 5 -> 6 -> 7
+	
+Now we get the new pointer, and we can repeat the process. Note that to retrieve the head, we need to record the first dummy node (0).
+
+Here is the code:
+
+public ListNode reverseKGroup(ListNode head, int k) {
+        ListNode dummy = new ListNode(0);
+        dummy.next = head;
+        ListNode pointer = dummy;
+        while (pointer != null) {
+            ListNode node = pointer;
+            // first check whether there are k nodes to reverse
+            for (int i = 0; i < k && node != null; i++) {
+                node = node.next;
+            }
+            if (node == null) break;
+            
+            // now we know that we have k nodes, we will start from the first node
+            ListNode prev = null, curr = pointer.next, next = null;
+            for (int i = 0; i < k; i++) {
+                next = curr.next;
+                curr.next = prev;
+                prev = curr;
+                curr = next;
+            }
+            ListNode tail = pointer.next;//ex : pointer.next = 1 since pointer 0 -> 1 -> ... because pointer = dummy and dummy.next = head
+            tail.next = curr;//curr : node after the tail of the kth reverse linked list
+            pointer.next = prev;//we take pointer 0 and we do 0 -> head of the kth reverse linked list
+            pointer = tail;//pointer = 1 : tail of the kth reverse linked list (because for the next reverse linked list we want to do the same step
+	    
+	 	// tail = pointer.next : point 1 -> 4 so tail = 4 because previous (tail.next = curr: node after the tail of the kth reverse linked list)
+		// tail.next =curr; curr : node after the tail of the k+1th reverse linked list
+		//pointer.next = prev : pointer 1 -> 6 prev because prev : head of the k+1th reverse linked list
+		//pointer = tail; put the pointer to the last node of the k+1th reverse linked list so : 4
+        }
+        return dummy.next;
+    }
