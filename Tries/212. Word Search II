@@ -1,0 +1,382 @@
+//Python
+
+
+Main changes:
+
+Removed visited set and instead used a "visited char" ("#") in the board, which will tell us if we already visited that position. After we finish the recursion we reset the "#" to its original value.
+Changed the ans set to a list (we avoid checking duplicates). The way we would manage this is by changing the "end/end of word" attribute to False when we add a word, so we verify we don't add it again.
+Converted the "word" parameter (string) into a global array/list. Without this change it will still give TLE.
+The last change does not affect the overall complexity but makes the code more scalable, which is the directions array/list. 
+This may help in the case the follow-up is to verify also the diagonals (we can easily add 4 more coordinates to the array).
+
+class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.end = False
+    
+    def add_word(self, word):
+        node = self
+        for c in word:
+            if c not in node.children:
+                node.children[c] = TrieNode()
+            node = node.children[c]
+        node.end = True
+
+class Solution:
+    def findWords(self, board: List[List[str]], words: List[str]) -> List[str]:
+        root = TrieNode()
+        for w in words:
+            root.add_word(w)
+        
+        rows, cols = len(board), len(board[0])
+        ans = []
+        word = []
+        directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+        
+        def dfs(x, y, node):
+            if not (0 <= x < rows) or not (0 <= y < cols) or board[x][y] == "#":
+                return
+            
+            char = board[x][y]
+            if char not in node.children:
+                return
+
+            board[x][y] = "#"
+            
+            node = node.children[char]
+            word.append(char)
+            if node.end:
+                ans.append("".join(word))
+                node.end = False
+            
+            for dx, dy in directions:
+                dfs(x + dx, y + dy, node)
+            
+            word.pop()
+            board[x][y] = char
+        
+        for i in range(rows):
+            for j in range(cols):
+                dfs(i, j, root)
+        
+        return ans
+
+
+
+Time complixity = m * n * 3 ^ k + N * k, right?
+TC for building Trie is: N * k, with k is length of words[i]
+TC for dfs is: m * n * 3 ^ k
+
+class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.isWord = False
+        self.refs = 0
+
+    def addWord(self, word):
+        cur = self
+        cur.refs += 1
+        for c in word:
+            if c not in cur.children:
+                cur.children[c] = TrieNode()
+            cur = cur.children[c]
+            cur.refs += 1
+        cur.isWord = True
+
+    def removeWord(self, word):
+        cur = self
+        cur.refs -= 1
+        for c in word:
+            if c in cur.children:
+                cur = cur.children[c]
+                cur.refs -= 1
+
+
+class Solution:
+    def findWords(self, board: List[List[str]], words: List[str]) -> List[str]:
+        root = TrieNode()
+        for w in words:
+            root.addWord(w)
+
+        ROWS, COLS = len(board), len(board[0])
+        res, visit = set(), set()
+
+        def dfs(r, c, node, word):
+            if (
+                r < 0
+                or c < 0
+                or r == ROWS
+                or c == COLS
+                or board[r][c] not in node.children
+                or node.children[board[r][c]].refs < 1
+                or (r, c) in visit
+            ):
+                return
+
+            visit.add((r, c))
+            node = node.children[board[r][c]]
+            word += board[r][c]
+            if node.isWord:
+                node.isWord = False
+                res.add(word)
+                root.removeWord(word)
+
+            dfs(r + 1, c, node, word)
+            dfs(r - 1, c, node, word)
+            dfs(r, c + 1, node, word)
+            dfs(r, c - 1, node, word)
+            visit.remove((r, c))
+
+        for r in range(ROWS):
+            for c in range(COLS):
+                dfs(r, c, root, "")
+
+        return list(res)
+      
+That function is called with 2 arguments, cord , indx
+cord is the coordination of the current character in the board,
+indx is the index of the next character of the word.
+
+So, in fact, the function is called with two data, a coordination in the board and the next character.
+The function checks if the given character is adjacent to the given coordination, if it exists, 
+then the function calls itself with the coordination of that character and the index of the next character.  
+
+
+for w in words:
+            if check(w):
+                if w[:4] == w[0]*4 or len(dic[w[-1]]) < len(dic[w[0]]):
+
+# len(dic[w[-1]]) < len(dic[w[0]]) -> Is what I am refering to.
+
+Say the word is: axyzb and it DOESN'T EXIST in the board,
+and the board contains 2 b and 4 a, so in this case, it is better to check if the word bzyxa is in the board or not.
+In cases that the input word don't exist in the board, parsing it from the lowest-frequent-end is more efficient.
+For instance, In this example, the algorithm needs to run through the board just two times (because there are 2 b in the board,) rather than running 4 times.
+
+   
+def findWords(self, board, words):
+
+   m, n = len(board), len(board[0])
+    dic = defaultdict(set)
+    
+    for i in range(m):
+        for j in range(n):
+            dic[board[i][j]].add((i, j))
+    
+    results = deque()
+    
+    word, lngth, word_isReversed = '', 0, False
+    def dfs(cord, indx):
+        if indx == lngth: 
+            if word_isReversed:
+                results.append(word[::-1])
+            else:
+                results.append(word)
+            return True
+        
+        ch = word[indx]
+        i, j = cord
+        for cand in [(i - 1, j), (i, j - 1), (i, j + 1), (i + 1, j)]:
+            if cand in dic[ch]:
+                dic[ch].remove(cand)
+                flag = dfs(cand, indx + 1)
+                dic[ch].add(cand)
+                if flag: return True
+
+        return False
+        
+    
+    ref = set()
+    for i in range(m):
+        for j in range(n - 1):
+            ref.add(board[i][j] + board[i][j + 1])
+    for j in range(n):
+        for i in range(m - 1):
+            ref.add(board[i][j] + board[i + 1][j])
+                
+    #len_dic = len(dic)
+    def check(word):
+        for i in range(len(word) - 1):
+            if word[i] + word[i + 1] not in ref:
+                if word[i + 1] + word[i] not in ref:
+                    return False
+        # wordCount = Counter(word)
+        # if len(wordCount) > len_dic:
+        #     return False
+        # for ch, count in wordCount.items():
+        #     if len(dic[ch]) < count:
+        #         return False
+        return True
+    
+    
+    for w in words:
+        if check(w):
+            if w[:4] == w[0]*4 or len(dic[w[-1]]) < len(dic[w[0]]):
+                word = w[::-1]
+                word_isReversed = True
+            else:
+                word = w
+                if word_isReversed: word_isReversed = False
+    
+            lngth = len(word)
+            for cord in list(dic[word[0]]):
+                dic[word[0]].remove(cord)
+                flag = dfs(cord, 1)
+                dic[word[0]].add(cord)
+                if flag: break
+        
+    return results
+    
+    
+    
+class Solution:
+    def findWords(self, board: List[List[str]], words: List[str]) -> List[str]:
+        solution = set()
+        trie = self.make_trie(words)
+        visited = set()
+        for i in range(len(board)):
+            for j in range(len(board[0])):
+                self.dfs(i,j,board,trie,visited,"",solution)
+        return solution
+    
+    def dfs(self,i,j,board,trie,visited,word,solution):
+        if "*" in trie:
+            if len(trie.keys()) == 0:
+                return
+            else:
+                solution.add(word)
+                del trie["*"]
+        if (i,j) in visited:
+            return
+        if (i < 0 or i == len(board) or j < 0 or j == len(board[0])):
+            return
+        if board[i][j] not in trie:
+            return
+        if len(trie[board[i][j]]) == 0:
+            del trie[board[i][j]]
+            return
+        visited.add((i,j))
+        neighbours = [(i,j-1),(i-1,j),(i,j+1),(i+1,j)]
+        for n_x,n_y in neighbours:
+            self.dfs(n_x,n_y,board,trie[board[i][j]],visited,word+board[i][j],solution)    
+        visited.remove((i,j))
+        
+    def make_trie(self,words):
+        trie = {}
+        for word in words:
+            current = trie
+            for char in word:
+                if char not in current:
+                    current[char] = {}
+                current = current[char]
+            current["*"] = "*"
+        return trie
+    
+Approach: DFS + Trie ~ O(MN * numPaths * 3^(longestWordLength)) runtime, O(numWords*longestWord) space - - 24ms(98.99%), 14.6MB (7.90%)
+Here the worst case runtime is the same (assuming similar words like "aaaaab" "aaaaac", etc.)
+But disregarding the extreme case, it is on average a lot faster due to pruning (i.e. instead of *numWords, it's *numPaths in Trie)
+
+Instead of looping through entire board for each word, at every character we check if it matches the first letter of any of the words
+and the letters that don't match are pruned.
+Ex: let's say we check board[0][0], and found 20/100 words that match on the first letter. That means 80/100 of the words are pruned right away
+(we didn't even look at the other 80 words due to properties of hashmap).
+
+What is a Trie?
+Diagram: https://drive.google.com/file/d/1McwXQIHmsk4sDwoYVNk0MhZFTMaDvnbg/view?usp=sharing
+It is a tree where each node stores a dictionary of next possible letters of a word sequence.
+This makes it so we can quickly prune and ignore the letters that don't match.
+
+class TrieNode:
+    def __init__(self, char=None, letterToChild=None, word=None, prev=None):
+        self.char = char # this node's current character
+        self.letterToChild = letterToChild # dictionary that maps child's letter to child's node
+        self.word = word #  when a word is complete from start to this node, we set what the word is from start to here (note that there can stll be more words down this path)
+        self.prev = prev # to backtrack and remove words that are already searched
+
+class Solution:
+    #24ms (faster than 98.86% Python 3) ~ O(MN * numPaths * 3^(longestWordLength)) runtime, O(totalWordLength * numWords) worst case memory
+    def findWords(self, board: List[List[str]], words: List[str]) -> List[str]:
+        if not board or len(board[0]) == 0 or not words:
+            return []
+
+        def buildTrie(words: List[str]):
+            #print("using words: {}".format(words))
+            # root node is character "/"
+            root = TrieNode(char="/")
+            for word in words:
+                # given a word, construct path of the word in Trie
+                index = 0
+                curNode = root
+                while index < len(word):
+                    #print("word[index]: {}".format(word[index]))
+                    # prepare childNode
+                    char = word[index]
+                    if not curNode.letterToChild:
+                        curNode.letterToChild = {}
+                    if char not in curNode.letterToChild:
+                        # if childNode doesn't exist, create it
+                        childNode = TrieNode(char=char,letterToChild={},prev=curNode) #for some reason I need the {} otherwise it's stealing from previous node
+                        curNode.letterToChild[char] = childNode
+                        #print("curNode's child: {}".format(curNode.letterToChild))
+                    else:
+                        childNode = curNode.letterToChild[char]
+                    
+                    # if at end of word, update the child node
+                    if index == len(word) - 1:
+                        childNode.word = word
+                        break
+
+                    index += 1
+                    curNode = childNode
+            return root
+        #build the Trie
+        root = buildTrie(words)
+
+        #iterate through the board
+        rows = len(board)
+        cols = len(board[0])
+        
+        resultList = []
+        def dfs(x,y,curNode:TrieNode):
+            #print("(x,y)=({},{})".format(x,y))
+            boardLetter = board[x][y]
+            if boardLetter in curNode.letterToChild:
+                board[x][y] = "*" #modify the board letter so we don't reuse during dfs search
+                # letter matches, get the childNode
+                nextNode = curNode.letterToChild[boardLetter]
+                # check if nextNode is at the end of a word; if so, add that to our resultList. Note that there may be more words further along this path.
+                if nextNode.word:
+                    resultList.append(nextNode.word)
+                    nextNode.word = None
+                    # delete the branch that is no longer needed (to avoid creating the same word again on next board iteration)
+                    if len(nextNode.letterToChild) == 0:
+                        #no more children below so need to backtrack and delete
+                        #backtrack stops if there are 2+ paths down, or if we're at the root node
+                        parentNode = curNode
+                        usedChar = nextNode.char
+                        while len(parentNode.letterToChild) == 1:
+                            #cut mapping of parentNode to used-childNode
+                            del parentNode.letterToChild[usedChar]
+                            usedChar = parentNode.char
+                            if usedChar == "/":
+                                #reached the top so no need to backtrack anymore
+                                break
+                            parentNode = parentNode.prev                            
+
+                # keep dfs traversing until end of word(s) in this Trie path
+                for dx,dy in [(-1,0),(1,0),(0,-1),(0,1)]:
+                    adjX, adjY = x+dx, y+dy 
+                    # check if adjacent position is in board
+                    if 0 <= adjX < rows and 0 <= adjY < cols:
+                        dfs(adjX,adjY,nextNode)
+            # no match with board or no more letters along this path
+            # revert back the letter modified by dfs (backtrack)
+            board[x][y] = boardLetter
+            return
+
+        for x in range(rows):
+            for y in range(cols):
+                #check if word match; if so, traverse dfs
+                curNode = root 
+                dfs(x,y,curNode)
+        return resultList
