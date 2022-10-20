@@ -61,27 +61,6 @@ class Trie:
         
 //v2
 
-Remove Nth Node From End of List	
-Copy List With Random Pointer	
-Add Two Numbers	
-Linked List Cycle	
-Find The Duplicate Number	
-LRU Cache	
-Merge K Sorted Lists	
-Reverse Nodes In K Group	
-
-
-
-
-Status
-Problem	
-Difficulty
-Video Solution
-Code
-Implement Trie Prefix Tree	
-Design Add And Search Words Data Structure	
-Word Search II	
-View on Github
 class TrieNode:
     def __init__(self):
         self.children = [None] * 26
