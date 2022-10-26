@@ -1,0 +1,149 @@
+class Solution(object):
+    def leastInterval(self, tasks, n):
+        """
+        :type tasks: List[str]
+        :type n: int
+        :rtype: int
+        """
+        if n == 0:
+            return len(tasks)
+
+        hs = collections.defaultdict(int)
+        for task in tasks:
+            hs[task] += 1
+
+        count = 0
+        cycle = n + 1
+
+        heap = []
+
+        for k, i in hs.iteritems():
+            if i > 0:
+                heapq.heappush(heap, (-i))                
+        while heap:
+            worktime = 0
+            tmp = []
+            for i in xrange(cycle):
+                if heap:
+                    tmp.append(heapq.heappop(heap))
+                    worktime += 1
+            for cnt in tmp:
+                cnt *= -1
+                cnt -= 1
+                if cnt > 0:
+                    heapq.heappush(heap, -cnt)
+            
+            count += cycle if len(heap) > 0 else worktime
+
+        return count
+        
+        
+# Suppose {A:6,B:4,C:2} n = 2 then we can fill the slot  in the matrix for clear visualization
+	# At every row there will be three element since n = 2
+	# So [
+	#		[ A  , B , C ],
+	#		[ A  , B , C ],
+	#		[ A , B , idle],
+	#		[ A , B , idle ],
+	#		[ A, idle , idle ],
+	#       [ A , empty ,empty ]
+	#    Here we can see that for first 5 row number of element is 
+	#     (maxfreq - 1) * ( number of element in column i.e (n + 1)
+	
+	#    For last row there might be all all three n + 1 element or less than that ,which depends upon 
+	#    frequency  of  elements in array.So we handle that case diffrently.
+	
+	#    For calculating number of element in last row,we can check how many character have
+	
+	#    max frequency which value of  last_row
+	# So final answer will be 
+					#    ans = (number of row - 1) * ( column) + number of element in last row
+class Solution:
+    def leastInterval(self, tasks: List[str], n: int) -> int:
+        freq = Counter(tasks)
+        max_freq = max(freq.values())
+        freq = list(freq.values())
+        last_row = freq.count(max_freq)
+        ans = (max_freq - 1) * (n + 1) + last_row
+        return max(len(tasks),ans)
+TC : O(N)
+SC : O(1)
+
+
+class Solution:
+    def leastInterval(self, tasks: List[str], n: int) -> int:
+        if n == 0:
+            return len(tasks)
+        
+        # Count frequency of each task
+        hashmap = {}
+        for task in tasks:
+            if task in hashmap:
+                hashmap[task] += 1
+            else:
+                hashmap[task] = 1
+        
+        # Build a max-heap of all the frequencies
+        heap = [-val for val in hashmap.values()]
+        heapq.heapify(heap)
+        
+        # Initialize a queue to hold the tasks which are waiting for cool down period
+        queue = deque() # [frequency, timeAtWhichItCanStartExecuting]
+        
+        timeTaken = 0
+        # Iterate till all the tasks are processed.
+        while heap or queue:
+            timeTaken += 1
+            # Pick the task from heap having the maximum frequency.
+            if heap:
+                frequency = -heapq.heappop(heap)
+                # Since only one task can be processed in a unit time. So process the task.
+                frequency -= 1
+                # Now if this task is left then it will have to wait for the cooldown period. So, enque the task till its cooldown period is expired.
+                if frequency:
+                    queue.append([frequency, timeTaken + n])
+                    
+            # Now process the tasks whose cooling period is expired.
+            while queue and queue[0][1] == timeTaken:
+                heapq.heappush(heap, -queue.popleft()[0])
+        
+        return timeTaken
+        
+        
+from operator import itemgetter
+
+class Solution:
+    '''
+    The main idea to solving this problem is:
+    you first identify the maximum idle slots.
+    Maxium idle slots will be equal to n * (m - 1)
+    where m is the frequency of the task occuring maximum times
+    
+    then we try to fill the idle slots with remaining tasks
+    if we are able to fill all idle slots, then no of unit times will be total no of tasks
+    else it will be total tasks + idle slots
+    
+    say, we have four tasks (A, B, C, D) with frequency (5, 3, 3, 2) and n=2
+    then, maximum idle slots = (5-1) * 2 = 8
+    A _ _ A _ _ A _ _ A _ _ A
+    then we iterate over remaining tasks and reduce the idle slots based on frequency of other tasks
+    now we will encounter B with frequency of 3
+    A B _ A B _ A B _ A _ _ A
+    Similarly fill with C 
+    A B C A B C A B _ A C _ A
+    A B C A B C A B D A C D A
+    '''
+        
+    def leastInterval(self, tasks: List[str], n: int) -> int:
+        task_map = {}
+        for task in tasks:
+            task_map[task] = task_map.get(task, 0) + 1
+            
+        task_list = sorted(task_map.items(), key=itemgetter(1), reverse=True)
+        idle_slots = (task_list[0][1] - 1 ) * n
+        for task in task_list[1:]:
+            # if frequency of task is equal to the frequency at task_list[0]
+            # then idle slots that can be filled will be frequency - 1
+            # else idle slots that can be filled will be frequency
+            idle_slots -= min(task[1], task_list[0][1]-1)
+        return len(tasks) + idle_slots if idle_slots > 0 else len(tasks)
