@@ -33,6 +33,8 @@ I am guessing that the D&C solution ran much slower than mine because it used re
 
 single if statement
 
+Max_heap
+
     def kClosest(self, points: List[List[int]], K: int) -> List[List[int]]:
         heap = []
 
@@ -73,6 +75,8 @@ When n is large, This solution has a constant factor of log(k) * n, which might 
 
 [1]: Note that we are not considering the last inline for-loop.
 
+
+//Min_heap
 
 import heapq
 class Solution:
