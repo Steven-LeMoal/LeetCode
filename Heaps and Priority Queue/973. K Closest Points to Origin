@@ -1,0 +1,121 @@
+//Python
+
+We keep a min heap of size K.
+For each item, we insert an item to our heap.
+If inserting an item makes heap size larger than k, then we immediately pop an item after inserting ( heappushpop ).
+
+Runtime:
+Inserting an item to a heap of size k take O(logK) time.
+And we do this for each item points.
+So runtime is O(N * logK) where N is the length of points.
+
+Space: O(K) for our heap.
+
+import heapq
+
+class Solution:
+    def kClosest(self, points: List[List[int]], K: int) -> List[List[int]]:
+        
+        heap = []
+        
+        for (x, y) in points:
+            dist = -(x*x + y*y)
+            if len(heap) == K:
+                heapq.heappushpop(heap, (dist, x, y))
+            else:
+                heapq.heappush(heap, (dist, x, y))
+        
+        return [(x,y) for (dist,x, y) in heap]
+I found it interesting that my solution ran much faster than "Divide And Conquer" solution under "Solution" tab which is supposed to run in O(N).
+Mine ran at 316ms while D&C solution ran at 536 ms.
+
+I am guessing that the D&C solution ran much slower than mine because it used recursions which would involved creating callstacks.
+
+single if statement
+
+    def kClosest(self, points: List[List[int]], K: int) -> List[List[int]]:
+        heap = []
+
+        for (x, y) in points:
+            d = -(x**2 + y**2)
+            heapq.heappush(heap, (d, x, y))
+            if len(heap) > K:
+                heapq.heappop(heap)
+        return [x[1:] for x in heap]
+        
+just for the comparison as it does everything; not for the interview.
+
+    def kClosest(self, points: List[List[int]], K: int) -> List[List[int]]:
+         return heapq.nsmallest(K, points, key=lambda x: x[0]**2 + x[1]**2)
+
+
+heap = []
+    for point in points:
+        dist = point[0] * point[0] + point[1] * point[1]
+        heapq.heappush(heap, (-dist, point))
+        if len(heap) > K:
+            heapq.heappop(heap)
+    
+    return [tuple[1] for tuple in heap]
+    
+    
+    
+Strategy	Analysis	Complexity
+
+Typical heap solution:	heapify costs O(n), heappop on k elements costs O(k * logn)	O(n + k * logn)
+This heap solution:	heappushpop on n elements costs O(n * logk)	O(n * logk)
+Partitioning solution:	find_median_of_medians costs O(10 * n/5 * 10/3), partition costs O(n * 10/3)	O(n)
+
+Although the best complexity is the Partitioning method, it has a huge constant factor of around 10n.
+
+When n is small and k is almost up to n, the Typical heap solution has a constant factor of around 2n, which would be slower than this solution. [1]
+When n is large, This solution has a constant factor of log(k) * n, which might be slower than the typical one. (not tested)
+
+[1]: Note that we are not considering the last inline for-loop.
+
+
+import heapq
+class Solution:
+    def kClosest(self, points: List[List[int]], K: int) -> List[List[int]]:
+        distances=[[x**2+y**2, x, y] for x, y in points]         
+        return [[x, y] for dist, x, y in heapq.nsmallest(K, distances)]  # TC: O(NlogK) but O(NlgN)
+        
+        
+Python
+
+class Solution:
+    def kClosest(self, P, k):
+        euclidean = lambda x, y : x*x + y*y
+        for p in P:
+            p.insert(0, euclidean(p[0], p[1]))
+        heapify(P)
+        return [heappop(P)[1:] for i in range(k)]
+Time Complexity : O(N + klogN), constructing the heap from given array of points P can be done in O(N) time.
+Then each heap pop operation would take O(logN) time which will be called for k times. Thus overall time will be O(N + klogN)
+
+Space Complexity : O(1), we are doing it in-place. If input modification is not allowed, use a copy of P and that would take O(N) space
+
+
+Python
+
+class Solution:
+    def kClosest(self, P, k):
+        euclidean = lambda p : p[0]**2 + p[1]**2
+        def partition(L, R):
+            random = randint(L, R)                 # choosing random pivot
+            P[R], P[random] = P[random], P[R]      # and swapping it to the end
+            i, pivotDist = L, euclidean(P[R])
+            for j in range(L, R+1):
+                if euclidean(P[j]) <= pivotDist:
+                    P[i], P[j] = P[j], P[i]
+                    i += 1
+            return i-1
+        
+        L, R, p = 0, len(P)-1, len(P)
+        while p != k:
+            p = partition(L, R)
+            if p < k:   L = p + 1
+            else    :   R = p - 1
+        return P[:k]
+Time Complexity : O(N), at each partition, we are eliminating one end and re-partitioning the other end till we get pivot at kth index. On average, the partitions roughly eliminate half of remaining elements each time thus leading to N + N/2 + N/4 + ... + 1 = O(2N) iterations. However, in the worst case, there's still a chance (although very low) that we choose the worst pivot at each partition and this leads to N + N-1 + N-2 + ... + 1 = N2 total iterations leading to time complexity of O(N2)
+Space Complexity : O(1), only constant extra space is being used
