@@ -139,3 +139,10 @@ class Solution:
             output.append([nums[j] for j in range(n) if bitmask[j] == '1'])
         
         return output
+        
+Complexity Analysis
+
+Time complexity: O(N×2^N) to generate all subsets and then copy them into output list.
+
+Space complexity: O(N×2^N) to keep all the subsets of length N, since each of N elements could be present or absent.
+
