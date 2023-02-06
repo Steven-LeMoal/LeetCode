@@ -1,0 +1,38 @@
+# Python
+
+/*
+We iterate through the bit string of the input integer, from right to left (i.e. n = n >> 1). 
+To retrieve the right-most bit of an integer, we apply the bit AND operation (n & 1).
+
+For each bit, we reverse it to the correct position (i.e. (n & 1) << power). Then we accumulate this reversed bit to the final result.
+*/
+
+class Solution:
+    # @param n, an integer
+    # @return an integer
+    def reverseBits(self, n):
+        ret, power = 0, 31
+        while n:
+            ret += (n & 1) << power
+            n = n >> 1
+            power -= 1
+        return ret
+        
+/*
+We can implement the algorithm in the following steps:
+1). First, we break the original 32-bit into 2 blocks of 16 bits, and switch them.
+2). We then break the 16-bits block into 2 blocks of 8 bits. Similarly, we switch the position of the 8-bits blocks
+3). We then continue to break the blocks into smaller blocks, until we reach the level with the block of 1 bit.
+4). At each of the above steps, we merge the intermediate results into a single integer which serves as the input for the next step.
+*/
+        
+class Solution:
+    # @param n, an integer
+    # @return an integer
+    def reverseBits(self, n):
+        n = (n >> 16) | (n << 16)
+        n = ((n & 0xff00ff00) >> 8) | ((n & 0x00ff00ff) << 8)
+        n = ((n & 0xf0f0f0f0) >> 4) | ((n & 0x0f0f0f0f) << 4)
+        n = ((n & 0xcccccccc) >> 2) | ((n & 0x33333333) << 2)
+        n = ((n & 0xaaaaaaaa) >> 1) | ((n & 0x55555555) << 1)
+        return n
