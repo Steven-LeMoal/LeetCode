@@ -1,0 +1,117 @@
+
+
+Determine the maximum number of additional diners who can potentially sit at the table without social distancing guidelines being violated for any new or existing diners, assuming that the existing diners cannot move and that the additional diners will cooperate to maximize how many of them can sit down.
+Please take care to write a solution which runs within the time limit.
+
+Sample test case #1
+N = 10
+K = 1
+M = 2
+S = [2, 6]
+Expected Return Value = 3
+Sample test case #2
+N = 15
+K = 2
+M = 3
+S = [11, 6, 14]
+Expected Return Value = 1
+
+Code
+
+from typing import List
+
+def getMaxAdditionalDinersCoun(N: int, K: int, M: int, S: List[int]) -> int:
+  # expand boundaries
+  S.append(-K)
+  S.append(N+K+1)
+  S.sort()
+  # get ranges of free seats
+  ranges = [S[i+1]-S[i] for i in range(len(S)-1)]
+  # get maximum number of seats that can be taken in each range
+  max_seats = [int(x/(K+1)-1) for x in ranges]
+  return sum(max_seats)
+
+
+from typing import List
+# Write any import statements here
+import math
+
+def getMaxAdditionalDinersCount(N: int, K: int, M: int, S: List[int]) -> int:
+  # Write your code here
+  S.sort()
+  start, res = 1, 0
+  S.append(N+K+1)
+  for s in S:
+      delta = s-K-start
+      if delta > 0: 
+          res += math.ceil(delta / (K+1))
+      start = s+K+1
+  return res
+
+
+from typing import List
+# Write any import statements here
+
+def getMaxAdditionalDinersCount(N: int, K: int, M: int, S: List[int]) -> int:
+  # Write your code here
+  ## we can iter of K from 1 to N and check (if on a value or in valid pos)
+  res = 0
+  S = sorted(S)
+  length = len(S)
+  tmp = -(K+1)
+  idx, i = 0, 1
+  
+  while(i <= N):
+    while(idx < length and i > S[idx]):
+      tmp = S[idx]
+      idx += 1
+    if tmp + K + 1 <= i and (idx >= length or S[idx] - i >= K + 1):
+      tmp = i
+      res += 1
+    else:
+      if idx < length and i < S[idx]:
+        tmp = S[idx]
+        i = S[idx]
+        idx += 1
+    
+    i += K + 1
+        
+  return res
+
+from typing import List
+# Write any import statements here
+
+def getMaxAdditionalDinersCount(N: int, K: int, M: int, S: List[int]) -> int:
+  # Write your code here
+  
+  ## we could iter of K from 1 to N and check (if on a value or in valid pos)
+
+
+  S = sorted(S)
+  res = 0
+  length = len(S)
+  
+  tmp = S[0] - K - 1
+  print(S[0], " -- ")
+  while(tmp > 0):
+    print(tmp)
+    tmp -= K + 1
+    res += 1
+    
+  for i, e in enumerate(S):
+    print(e, " -- ")
+    if i + 1 < length:
+      maxi = S[i + 1] - K - 1
+      tmp = e + K + 1
+      while tmp <= maxi:
+        print(tmp)
+        tmp += K + 1
+        res += 1
+    else:
+      tmp = e + K + 1
+      while(tmp <= N):
+        print(tmp)
+        tmp += K + 1
+        res += 1
+ 
+  return res
